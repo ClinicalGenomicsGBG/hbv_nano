@@ -78,4 +78,4 @@ samtools stats $sort_h |grep -i 'error rate' | cut -f 3
 echo "i:"
 samtools stats $sort_i |grep -i 'error rate' | cut -f 3
 
-  
+ samtools mpileup
