@@ -1,4 +1,5 @@
-#hbv pipeline (director's cut)_
+#hbv pipeline (director's cut)
+
 conda activate /Users/daniel/miniconda/envs/minimap2
 
 ref_a=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_a.fa		#location of reference sequence
@@ -11,9 +12,9 @@ ref_g=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_g.fa
 ref_h=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_h.fa
 ref_i=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_i.fa
 
-reads=/Users/daniel/Desktop/hbv/sequences_0331_rapid_flongle/KH22-5514_provförväx_kontamination__R1.fastq 	#location of reads
+reads= 	#enter path to reads here
 
-samout_a="${reads:0:-6}_al_a.sam"
+samout_a="${reads:0:-6}_al_a.sam"   #writes the .sam output to the same path as the read input
 samout_b="${reads:0:-6}_al_b.sam"
 samout_c="${reads:0:-6}_al_c.sam"
 samout_d="${reads:0:-6}_al_d.sam"
@@ -22,8 +23,6 @@ samout_f="${reads:0:-6}_al_f.sam"
 samout_g="${reads:0:-6}_al_g.sam"
 samout_h="${reads:0:-6}_al_h.sam"
 samout_i="${reads:0:-6}_al_i.sam"
-
-#/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/I_AF241409_Vietnam.
 
 minimap2 -ax map-ont $ref_a $reads > $samout_a
 minimap2 -ax map-ont $ref_b $reads > $samout_b
