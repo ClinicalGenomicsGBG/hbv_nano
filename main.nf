@@ -1,7 +1,16 @@
 #!/usr/bin/env nextflow
+nextflow.enable.dsl=2 
 
-params.greeting = "hbv_nano"
+process pythonTask {
+    """
+    #!/usr/bin/python3
 
-greeting_ch = Channel.of(params.greeting)
+    x = 'Hello'
+    y = 'world!'
+    print "%s - %s" % (x,y)
+    """
+}
 
-workflow {}
+workflow {
+    pythonTask()
+}
