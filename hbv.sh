@@ -2,17 +2,18 @@
 
 conda activate /Users/daniel/miniconda/envs/minimap2
 
-ref_a=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_a.fa		#location of reference sequence
-ref_b=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_b.fa
-ref_c=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_c.fa
-ref_d=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_d.fa
-ref_e=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_e.fa
-ref_f=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_f.fa
-ref_g=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_g.fa
-ref_h=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_h.fa
-ref_i=/Users/daniel/Desktop/hbv/hbv_referensgenom_nya/ref_i.fa
 
-reads= 	#enter path to reads here
+ref_a=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_a.fa		#location of reference sequence
+ref_b=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_b.fa
+ref_c=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_c.fa
+ref_d=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_d.fa
+ref_e=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_e.fa
+ref_f=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_f.fa
+ref_g=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_g.fa
+ref_h=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_h.fa
+ref_i=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_i.fa
+
+reads=/Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode06/bc06.fastq.gz
 
 samout_a="${reads:0:-6}_al_a.sam"   #writes the .sam output to the same path as the read input
 samout_b="${reads:0:-6}_al_b.sam"
@@ -23,6 +24,7 @@ samout_f="${reads:0:-6}_al_f.sam"
 samout_g="${reads:0:-6}_al_g.sam"
 samout_h="${reads:0:-6}_al_h.sam"
 samout_i="${reads:0:-6}_al_i.sam"
+
 
 minimap2 -ax map-ont $ref_a $reads > $samout_a
 minimap2 -ax map-ont $ref_b $reads > $samout_b
@@ -77,4 +79,12 @@ samtools stats $sort_h |grep -i 'error rate' | cut -f 3
 echo "i:"
 samtools stats $sort_i |grep -i 'error rate' | cut -f 3
 
- samtools mpileup
+#samtools mpileup
+"""
+samtools mpileup -uf /Users/daniel/Desktop/hbv/hbv_referensgenom/ref_e.fa /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode01/bc01.fa_al_e_sorted.bam | bcftools call -c | vcfutils.pl vcf2fq > /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode01/bc01.fa_al_e_sorted_consensus.fasta
+samtools mpileup -uf /Users/daniel/Desktop/hbv/hbv_referensgenom/ref_a.fa /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode02/bc02.fa_al_a_sorted.bam | bcftools call -c | vcfutils.pl vcf2fq > /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode02/bc02.fa_al_a_sorted_consensus.fasta
+samtools mpileup -uf /Users/daniel/Desktop/hbv/hbv_referensgenom/ref_a.fa /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode03/bc03.fa_al_a_sorted.bam | bcftools call -c | vcfutils.pl vcf2fq > /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode03/bc03.fa_al_a_sorted_consensus.fasta
+samtools mpileup -uf /Users/daniel/Desktop/hbv/hbv_referensgenom/ref_d.fa /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode04/bc04.fa_al_d_sorted.bam | bcftools call -c | vcfutils.pl vcf2fq > /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode04/bc04.fa_al_d_sorted_consensus.fasta
+samtools mpileup -uf /Users/daniel/Desktop/hbv/hbv_referensgenom/ref_d.fa /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode05/bc05.fa_al_d_sorted.bam | bcftools call -c | vcfutils.pl vcf2fq > /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode05/bc05.fa_al_d_sorted_consensus.fasta
+samtools mpileup -uf /Users/daniel/Desktop/hbv/hbv_referensgenom/ref_e.fa /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode06/bc06.fa_al_e_sorted.bam | bcftools call -c | vcfutils.pl vcf2fq > /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode06/bc06.fa_al_e_sorted_consensus.fasta 
+"""   
