@@ -12,10 +12,10 @@ ref_g=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_g.fa
 ref_h=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_h.fa
 ref_i=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_i.fa
 
-sorted=/Users/daniel/Desktop/hbv/sequences_0331_rapid_flongle/selected/KH22-5514_provförväx_kontamination__R1_al_a_sorted.bam
+sorted=/Users/daniel/Desktop/hbv/validering/hbv_val_02/val_02/20230511_1357_MN29974_AOK137_0a7c36c2/fastq_pass/barcode12/neg_ctrl_bc12.fa_al_d_sorted.bam
 out="${sorted:0:-11}_consensus.fasta"
 
-samtools mpileup -uf  $ref_a $sorted | bcftools call -c | vcfutils.pl vcf2fq > $out
+samtools mpileup -uf  $ref_d $sorted | bcftools call -c | vcfutils.pl vcf2fq > $out
 
 echo $out
 
