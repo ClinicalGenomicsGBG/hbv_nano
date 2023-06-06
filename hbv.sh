@@ -1,11 +1,12 @@
 #hbv pipeline (director's cut)
 #must use source hbv.sh to run script
 
+#run consensus.sh after this script
 conda activate /Users/daniel/miniconda/envs/minimap2
 
 
 ref_a=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_a.fa		#location of reference sequence
-ref_b=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_b.fa
+ref_b=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_b.fa  
 ref_c=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_c.fa
 ref_d=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_d.fa
 ref_e=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_e.fa
@@ -15,7 +16,7 @@ ref_h=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_h.fa
 ref_i=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_i.fa
 
 #reads=/Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode06/bc06.fastq.gz
-reads=/Users/daniel/Desktop/hbv/validering/hbv_val_02/val_02/20230511_1357_MN29974_AOK137_0a7c36c2/fastq_pass/barcode12/neg_ctrl_bc12.fastq.gz
+reads=/Users/daniel/Desktop/hbv/validering/hbv_val_04/barcode19/bc19_fastp.fastq.gz
 
 samout_a="${reads:0:-6}_al_a.sam"   #writes the .sam output to the same path as the read input
 samout_b="${reads:0:-6}_al_b.sam"

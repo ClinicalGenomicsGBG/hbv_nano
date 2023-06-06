@@ -1,5 +1,6 @@
 #must use source consensus.sh to run script
 
+#run this script after hbv.sh has been run
 conda activate /Users/daniel/miniconda/envs/samtools
 
 ref_a=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_a.fa		#location of reference sequence
@@ -12,10 +13,10 @@ ref_g=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_g.fa
 ref_h=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_h.fa
 ref_i=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_i.fa
 
-sorted=/Users/daniel/Desktop/hbv/validering/hbv_val_02/val_02/20230511_1357_MN29974_AOK137_0a7c36c2/fastq_pass/barcode12/neg_ctrl_bc12.fa_al_d_sorted.bam
+sorted=/Users/daniel/Desktop/hbv/validering/hbv_val_04/barcode23/bc23_fastp.fa_al_e_sorted.bam        #sorted bam file with reads
 out="${sorted:0:-11}_consensus.fasta"
 
-samtools mpileup -uf  $ref_d $sorted | bcftools call -c | vcfutils.pl vcf2fq > $out
+samtools mpileup -uf  $ref_e $sorted | bcftools call -c --ploidy 1 | vcfutils.pl vcf2fq > $out     #change ref_x
 
 echo $out
 
