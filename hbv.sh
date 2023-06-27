@@ -16,7 +16,7 @@ ref_h=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_h.fa
 ref_i=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_i.fa
 
 #reads=/Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode06/bc06.fastq.gz
-reads=/Users/daniel/Desktop/hbv/validering/hbv_val_04/barcode19/bc19_fastp.fastq.gz
+reads=/Users/daniel/Desktop/hbv/validering/hbv_val_05/barcode01/bc01.fastq.gz
 
 samout_a="${reads:0:-6}_al_a.sam"   #writes the .sam output to the same path as the read input
 samout_b="${reads:0:-6}_al_b.sam"

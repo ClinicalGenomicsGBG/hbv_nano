@@ -13,11 +13,11 @@ ref_g=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_g.fa
 ref_h=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_h.fa
 ref_i=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_i.fa
 
-sorted=/Users/daniel/Desktop/hbv/validering/hbv_val_04/barcode23/bc23_fastp.fa_al_e_sorted.bam        #sorted bam file with reads
-out="${sorted:0:-11}_consensus.fasta"
+sorted=/Users/daniel/Desktop/hbv/validering/hbv_val_05/barcode06/bc06.fa_al_d_sorted.bam     #sorted bam file with reads
+out="${sorted:0:-11}_consensus_20.fasta"
 
-samtools mpileup -uf  $ref_e $sorted | bcftools call -c --ploidy 1 | vcfutils.pl vcf2fq > $out     #change ref_x
-
+samtools mpileup -uf  $ref_d $sorted | bcftools call -c --ploidy 1 | vcfutils.pl vcf2fq -d20 > $out     #change ref_x   #can add -d20 for vcfutils to only include reads with depth >20
+                                                                                                        #standard is -d3
 echo $out
 
 conda deactivate
