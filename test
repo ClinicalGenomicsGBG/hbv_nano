@@ -1,0 +1,9 @@
+# Test of some conda stuff
+
+import subprocess
+subprocess.run(". $CONDA_PREFIX/Users/xschmd/miniconda3/samtools/etc/profile.d/conda.sh && conda activate /Users/xschmd/miniconda3/hbv && conda info", shell=True)
+#subprocess.run("conda info", shell=True)
+#subprocess.run("conda list", shell=True)
+
+
+

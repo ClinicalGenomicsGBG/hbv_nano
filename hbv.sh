@@ -5,18 +5,7 @@
 #conda activate /Users/daniel/miniconda/envs/minimap2
 conda activate /Users/xschmd/miniconda3/hbv
 
-
-#ref_a=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_a.fa		#location of reference sequence
-#ref_b=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_b.fa  
-#ref_c=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_c.fa
-#ref_d=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_d.fa
-#ref_e=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_e.fa
-#ref_f=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_f.fa
-#ref_g=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_g.fa
-#ref_h=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_h.fa
-#ref_i=/Users/daniel/Desktop/hbv/hbv_referensgenom/ref_i.fa
-
-ref_a=/Users/xschmd/Desktop/referensgenom/ref_a.fa
+ref_a=/Users/xschmd/Desktop/referensgenom/ref_a.fa    #location of reference sequence
 ref_b=/Users/xschmd/Desktop/referensgenom/ref_b.fa
 ref_c=/Users/xschmd/Desktop/referensgenom/ref_c.fa
 ref_d=/Users/xschmd/Desktop/referensgenom/ref_d.fa
@@ -26,9 +15,7 @@ ref_g=/Users/xschmd/Desktop/referensgenom/ref_g.fa
 ref_h=/Users/xschmd/Desktop/referensgenom/ref_h.fa
 ref_i=/Users/xschmd/Desktop/referensgenom/ref_i.fa
 
-
-#reads=/Users/daniel/Desktop/hbv/validering/hbv_val_05/barcode01/bc01.fastq.gz
-reads=/Users/xschmd/Desktop/validering/hbv_val_06/fastq_pass/barcode11/bc11_filtered.fastq.gz
+reads=/Users/xschmd/Desktop/validering/hbv_val_06/fastq_pass/barcode12/bc12_filtered.fastq.gz
 
 samout_a="${reads:0:-6}_al_a.sam"   #writes the .sam output to the same path as the read input
 samout_b="${reads:0:-6}_al_b.sam"
@@ -41,7 +28,7 @@ samout_h="${reads:0:-6}_al_h.sam"
 samout_i="${reads:0:-6}_al_i.sam"
 
 
-minimap2 -ax map-ont $ref_a $reads > $samout_a
+minimap2 -ax map-ont $ref_a $reads > $samout_a    #map the reads to the reference sequences (of the different genotypes)
 minimap2 -ax map-ont $ref_b $reads > $samout_b
 minimap2 -ax map-ont $ref_c $reads > $samout_c
 minimap2 -ax map-ont $ref_d $reads > $samout_d
@@ -54,7 +41,7 @@ minimap2 -ax map-ont $ref_i $reads > $samout_i
 #conda deactivate
 
 #conda activate /Users/daniel/miniconda/envs/samtools
-sort_a="${samout_a:0:-4}_sorted.bam"
+sort_a="${samout_a:0:-4}_sorted.bam"   #naming of the sorted bam files
 sort_b="${samout_b:0:-4}_sorted.bam"
 sort_c="${samout_c:0:-4}_sorted.bam"
 sort_d="${samout_d:0:-4}_sorted.bam"
