@@ -1,9 +1,25 @@
 # Test of some conda stuff
 
-import subprocess
-subprocess.run(". $CONDA_PREFIX/Users/xschmd/miniconda3/samtools/etc/profile.d/conda.sh && conda activate /Users/xschmd/miniconda3/hbv && conda info", shell=True)
+#import subprocess
+#subprocess.run(". $CONDA_PREFIX/Users/xschmd/miniconda3/samtools/etc/profile.d/conda.sh && conda activate /Users/xschmd/miniconda3/hbv && conda info", shell=True)
 #subprocess.run("conda info", shell=True)
 #subprocess.run("conda list", shell=True)
 
 
+a = [7,23,1,4,5,0.2,2,839,8,10]
+#print(min(a))
+print(a)
+a.sort()
+print(a)
+min=a[+1]
+min2=a[+2]
+print("minsta", min, min2)
+print("the second smallest value is", a[+2])
 
+thisdict = {"a": 0.34,"b": 45,"c": 1}
+print(thisdict["b"])
+
+#sorted(thisdict.items(), key=lambda x: x[1], reverse=True)
+#script to get the values from a dictionary in a sorted order
+sorted = {k: v for k, v in sorted(thisdict.items(), key=lambda item: item[1])}
+print(sorted)

@@ -1,8 +1,7 @@
 #hbv pipeline (director's cut)
-#must use source hbv.sh to run script
-
+#use source hbv.sh to run script
 #run consensus.sh after this script
-#conda activate /Users/daniel/miniconda/envs/minimap2
+
 conda activate /Users/xschmd/miniconda3/hbv
 
 ref_a=/Users/xschmd/Desktop/referensgenom/ref_a.fa    #location of reference sequence
@@ -15,7 +14,7 @@ ref_g=/Users/xschmd/Desktop/referensgenom/ref_g.fa
 ref_h=/Users/xschmd/Desktop/referensgenom/ref_h.fa
 ref_i=/Users/xschmd/Desktop/referensgenom/ref_i.fa
 
-reads=/Users/xschmd/Desktop/validering/hbv_val_06/fastq_pass/barcode12/bc12_filtered.fastq.gz
+reads=/Users/xschmd/Desktop/validering/hbv_val_07/fastq_pass/barcode18/bc18_filtered.fastq.gz
 
 samout_a="${reads:0:-6}_al_a.sam"   #writes the .sam output to the same path as the read input
 samout_b="${reads:0:-6}_al_b.sam"
