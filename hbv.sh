@@ -14,13 +14,13 @@ ref_g=/Users/xschmd/Desktop/referensgenom/ref_g.fa
 ref_h=/Users/xschmd/Desktop/referensgenom/ref_h.fa
 ref_i=/Users/xschmd/Desktop/referensgenom/ref_i.fa
 
-reads=/Users/xschmd/Desktop/validering/hbv_val_07/fastq_pass/barcode18/bc18_filtered.fastq.gz
+reads=/Users/xschmd/Desktop/SCOPEWholeGenomeRun/for_analysis/bc17/barcode17_filtered.fastq.gz
 
 samout_a="${reads:0:-6}_al_a.sam"   #writes the .sam output to the same path as the read input
 samout_b="${reads:0:-6}_al_b.sam"
 samout_c="${reads:0:-6}_al_c.sam"
 samout_d="${reads:0:-6}_al_d.sam"
-samout_e="${reads:0:-6}_al_e.sam"
+samout_e="${reads:0:-6}_al_e.sam"  
 samout_f="${reads:0:-6}_al_f.sam"
 samout_g="${reads:0:-6}_al_g.sam"
 samout_h="${reads:0:-6}_al_h.sam"
