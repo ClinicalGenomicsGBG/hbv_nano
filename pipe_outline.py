@@ -14,9 +14,10 @@ samtools stats sorted_alignment.bam |grep -i 'error rate' | cut -f 3    # get er
 
 #4.
 samtools mpileup -uf ref_genome.fasta sorted_alignment.bam | bcftools call -c | vcfutils.pl vcf2fq > consensus.fasta # get consensus
-                                                                        
+                                                            
 # "#4." should instead be done using samtools consensus!
-#e.g. samtools consensus -o test_d1000.fa -m simple -d1000 bc07_filtered.fa_al_d_sorted.bam
+For example: samtools consensus -o test_d20.fa -m simple -d20 bc07_filtered.fa_al_d_sorted.bam
+samtools consensus -o /home/xschmd/hbv/hbv_val/val_08/bc20_d20_consensus -m simple -d20 /home/xschmd/hbv/hbv_val/val_08/barcode19_filtered.fa_al_d_sorted.bam
 
 #5.
 medaka_consensus -i reads.fastq -d consensus.fasta -o /outpath  -m r941_min_sup_g507    # use medaka to polish consensus
