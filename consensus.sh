@@ -1,7 +1,7 @@
-#must use source consensus.sh to run script
+# This is deprcated and will be replaced byt samtools consensus
 
-#run this script after hbv.sh has been run
-#conda activate /Users/daniel/miniconda/envs/samtools
+# Use source consensus.sh to run script
+# Run this script after hbv.sh has been run
 
 conda activate /Users/xschmd/miniconda3/hbv
 

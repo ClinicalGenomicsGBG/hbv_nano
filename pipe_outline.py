@@ -10,14 +10,10 @@ minimap2 -ax map-ont ref.fasta reads.fastq > alignment.sam  # map reads to refer
 samtools view -S -b alignment.sam | samtools sort -o sorted_alignment.bam   # convert .sam files to .bam and sort them
 
 #3.
-samtools stats sorted_alignment.bam |grep -i 'error rate' | cut -f 3    # get error rate (used for (manually) selecting best alignment). Take the lowest error rate.
+samtools stats sorted_alignment.bam |grep -i 'error rate' | cut -f 3    # get error rate (used for selecting best alignment). Take the lowest error rate.
 
-#4.
-samtools mpileup -uf ref_genome.fasta sorted_alignment.bam | bcftools call -c | vcfutils.pl vcf2fq > consensus.fasta # get consensus
-                                                            
-# "#4." should instead be done using samtools consensus!
-For example: samtools consensus -o test_d20.fa -m simple -d20 bc07_filtered.fa_al_d_sorted.bam
-samtools consensus -o /home/xschmd/hbv/hbv_val/val_08/bc20_d20_consensus -m simple -d20 /home/xschmd/hbv/hbv_val/val_08/barcode19_filtered.fa_al_d_sorted.bam
+#4. - generate consensus sequence
+samtools consensus -o <consensus.fa> -m simple -d20 <sorted_alignment.bam>    # generate consensus sequence from sorted alignment
 
 #5.
 medaka_consensus -i reads.fastq -d consensus.fasta -o /outpath  -m r941_min_sup_g507    # use medaka to polish consensus

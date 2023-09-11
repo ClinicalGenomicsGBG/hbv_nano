@@ -1,9 +1,15 @@
+#!/usr/bin/env python3
+
+import os
+import glob
+
+
 # Reference sequences (a-i)
 
 ref_folder = "/Users/xschmd/Desktop/referensgenom"    #location of reference sequences
 
 #print(glob.glob(f"{ref_folder}/*.fa"))
-
+#ref_a=/Users/xschmd/Desktop/referensgenom/ref_a.fa
 ref_a = f"{ref_folder}/ref_a.fa"    #location of reference sequence
 ref_b = f"{ref_folder}/ref_b.fa"
 ref_c = f"{ref_folder}/ref_c.fa"
@@ -19,5 +25,9 @@ ref_genomes = {"a": ref_a, "b": ref_b, "c": ref_c, "d": ref_d, "e": ref_e, "f": 
 #print(ref_genomes["a"])
 
 # Location of reads:
-reads = ""    #location of reads
-#reads = "/Users/xschmd/Desktop/SCOPEWholeGenomeRun/for_analysis/bc17/barcode17_filtered.fastq.gz"
+reads = "/Users/xschmd/Desktop/test2"   #location of reads
+
+folder_names = glob.glob(f"{reads}/*")
+test = os.path.basename(os.path.normpath(folder_names[1]))
+print(folder_names)
+print(test, "test")
