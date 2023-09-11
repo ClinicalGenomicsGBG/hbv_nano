@@ -21,12 +21,8 @@ ref_i = f"{ref_folder}/ref_i.fa"
 
 ref_genomes = {"a": ref_a, "b": ref_b, "c": ref_c, "d": ref_d, "e": ref_e, "f": ref_f, "g": ref_g, "h": ref_h, "i": ref_i}
 
-#print(ref_genomes["a"])
-
 # Location of reads:
 reads = ""   #location of reads
 
 folder_names = glob.glob(f"{reads}/*")
 test = os.path.basename(os.path.normpath(folder_names[1]))
-print(folder_names)
-print(test, "test")
