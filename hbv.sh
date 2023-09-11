@@ -75,12 +75,4 @@ samtools stats $sort_g |grep -i 'error rate' | cut -f 3
 echo "h:"
 samtools stats $sort_h |grep -i 'error rate' | cut -f 3
 echo "i:"
-samtools stats $sort_i |grep -i 'error rate' | cut -f 3
-
-#samtools mpileup
-#samtools mpileup -uf /Users/daniel/Desktop/hbv/hbv_referensgenom/ref_e.fa /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode01/bc01.fa_al_e_sorted.bam | bcftools call -c | vcfutils.pl vcf2fq > /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode01/bc01.fa_al_e_sorted_consensus.fasta
-#samtools mpileup -uf /Users/daniel/Desktop/hbv/hbv_referensgenom/ref_a.fa /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode02/bc02.fa_al_a_sorted.bam | bcftools call -c | vcfutils.pl vcf2fq > /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode02/bc02.fa_al_a_sorted_consensus.fasta
-#samtools mpileup -uf /Users/daniel/Desktop/hbv/hbv_referensgenom/ref_a.fa /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode03/bc03.fa_al_a_sorted.bam | bcftools call -c | vcfutils.pl vcf2fq > /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode03/bc03.fa_al_a_sorted_consensus.fasta
-#samtools mpileup -uf /Users/daniel/Desktop/hbv/hbv_referensgenom/ref_d.fa /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode04/bc04.fa_al_d_sorted.bam | bcftools call -c | vcfutils.pl vcf2fq > /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode04/bc04.fa_al_d_sorted_consensus.fasta
-#samtools mpileup -uf /Users/daniel/Desktop/hbv/hbv_referensgenom/ref_d.fa /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode05/bc05.fa_al_d_sorted.bam | bcftools call -c | vcfutils.pl vcf2fq > /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode05/bc05.fa_al_d_sorted_consensus.fasta
-#samtools mpileup -uf /Users/daniel/Desktop/hbv/hbv_referensgenom/ref_e.fa /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode06/bc06.fa_al_e_sorted.bam | bcftools call -c | vcfutils.pl vcf2fq > /Users/daniel/Desktop/hbv_val_01/1-2-3-4-5-ctrl/20230420_1258_MN29974_AOJ936_7461b1af/fastq_pass/barcode06/bc06.fa_al_e_sorted_consensus.fasta   
+samtools stats $sort_i |grep -i 'error rate' | cut -f 3   
