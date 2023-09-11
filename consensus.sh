@@ -1,4 +1,4 @@
-# This is deprcated and will be replaced byt samtools consensus
+# This is deprecated and will be replaced by samtools consensus
 
 # Use source consensus.sh to run script
 # Run this script after hbv.sh has been run
