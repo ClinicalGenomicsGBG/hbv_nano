@@ -20,3 +20,5 @@ medaka_consensus -i reads.fastq -d consensus.fasta -o /outpath  -m r941_min_sup_
 r941_min_sup_g507 = {pore}_{device}_{caller variant}_{caller version}
 
 """
+
+#This is legacy
