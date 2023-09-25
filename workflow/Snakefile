@@ -1,5 +1,7 @@
-#snakemake -np fastp/{bc15,bc16}_filt.fastq.gz (dry run these two files)
-#snakenake -np (dry run everything)
+# snakemake -np fastp/{bc15,bc16}_filt.fastq.gz (dry run these two files)
+# snakenake -np (dry run everything)
+
+# currently run using this mamba env: /home/xschmd/micromamba/envs/snakemake_hbv
 
 FILES = glob_wildcards("data/{sample}.fastq.gz")    # get all fastq files
 
