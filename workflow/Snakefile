@@ -10,3 +10,12 @@ NAMES = FILES.sample    # extract the sample names from the files
 rule all:    # specify the final output files
     input:
         expand("fastp/{sample}_filt.fastq.gz", sample=NAMES)
+
+rule fastp:    # filter reads
+    input:
+        fastq = "data/{sample}.fastq.gz"
+    output: 
+        fastq = "fastp/{sample}_filt.fastq.gz",    # output filtered read
+        report = "fastp/report/{sample}_filt.html"       # output fastp report
+    shell:
+        "fastp -i {input.fastq} -o {output.fastq} -h {output.report}"
