@@ -1,0 +1,10 @@
+#snakemake -np fastp/{bc15,bc16}_filt.fastq.gz (dry run these two files)
+#snakenake -np (dry run everything)
+
+FILES = glob_wildcards("data/{sample}.fastq.gz")    # get all fastq files
+
+NAMES = FILES.sample    # extract the sample names from the files
+
+rule all:    # specify the final output files
+    input:
+        expand("fastp/{sample}_filt.fastq.gz", sample=NAMES)
