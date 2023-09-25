@@ -1,6 +1,3 @@
-# snakemake -np fastp/{bc15,bc16}_filt.fastq.gz (dry run these two files)
-# snakenake -np (dry run everything)
-
 # currently run using this mamba env: /home/xschmd/micromamba/envs/snakemake_hbv
 
 FILES = glob_wildcards("data/{sample}.fastq.gz")    # get all fastq files
@@ -19,3 +16,12 @@ rule fastp:    # filter reads
         report = "fastp/report/{sample}_filt.html"       # output fastp report
     shell:
         "fastp -i {input.fastq} -o {output.fastq} -h {output.report}"
+
+rule minimap2:
+    input:
+        ref = "reference_genomes/ref_a.fa",
+        fastq = "fastp/{sample}_filt.fastq.gz"
+    output:
+        sam = "minimap2/{sample}.sam"
+    shell:
+        "minimap2 -ax map-ont {input.ref} {input.fastq} > {output.sam}"
