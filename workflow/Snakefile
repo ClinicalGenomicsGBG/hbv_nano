@@ -19,10 +19,10 @@ rule fastp:    # filter reads
     shell:
         "fastp -i {input.fastq} -o {output.fastq} -h {output.report}"
 
-rule minimap2:
+rule minimap2:    # map reads to reference genomes.
     input:
-        ref = "reference_genomes/ref_a.fa",
-        fastq = "fastp/{sample}_filt.fastq.gz"
+        ref = "reference_genomes/ref_a.fa",    # only one at the moment, the others will be added
+        fastq = "fastp/{sample}_filt.fastq.gz"    # filtered reads
     output:
         sam = "minimap2/{sample}.sam"
     shell:
