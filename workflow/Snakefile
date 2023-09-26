@@ -7,7 +7,8 @@ NAMES = FILES.sample    # extract the sample names from the files
 rule all:    # specify the final output files
     input:
         expand("fastp/{sample}_filt.fastq.gz", sample=NAMES),
-        expand("minimap2/{sample}.sam", sample=NAMES)
+        expand("minimap2/{sample}.sam", sample=NAMES),
+        expand("samtools/{sample}.bam", sample=NAMES)
 
 rule fastp:    # filter reads
     input:
