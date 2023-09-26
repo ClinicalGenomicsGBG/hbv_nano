@@ -1,6 +1,6 @@
 # Run in this env.: /medstore/Development/nanopore_HBV/daniel/micromamba/envs/snakemake_hbv
 # Dry run with: snakemake -np
-# Run with e.g.: snakemake --cores 4
+# Run with e.g.: snakemake -c4
 
 FILES = glob_wildcards("data/{sample}.fastq.gz")    # get all fastq files
 
