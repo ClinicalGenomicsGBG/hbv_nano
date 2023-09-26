@@ -26,3 +26,11 @@ rule minimap2:
         sam = "minimap2/{sample}.sam"
     shell:
         "minimap2 -ax map-ont {input.ref} {input.fastq} > {output.sam}"
+
+rule samtools:
+    input:
+        sam = "minimap2/{sample}.sam"
+    output:
+        bam = "samtools/{sample}.bam"
+    shell:
+        "samtools view -bS {input.sam} | samtools sort -o {output.bam}"
