@@ -28,7 +28,7 @@ rule minimap2:    # map reads to reference genomes.
         ref = "reference_genomes/ref_a.fa",    # only one at the moment, the others will be added
         fastq = "fastp/{sample}_filt.fastq.gz"    # filtered reads
     output:
-        sam = "minimap2/{sample}.sam"
+        sam = temp("minimap2/{sample}.sam")
     shell:
         "minimap2 -ax map-ont {input.ref} {input.fastq} > {output.sam}"
 
