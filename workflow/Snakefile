@@ -3,14 +3,23 @@
 # Run with e.g.: snakemake -c4
 
 FILES = glob_wildcards("data/{sample}.fastq.gz")    # get all fastq files
-
 NAMES = FILES.sample    # extract the sample names from the files
+
+REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference genomes 
+REF = REFERENCE.ref    # extract the reference genome names
+
+
+#test = expand("minimap2/{sample}.{ref}.sam", sample=NAMES, ref=REF)
+#test2 = expand("minimap2/{sample}_{ref}.sam", sample=NAMES, ref=REF)
+#print(test, "PERIOD")
+#print(test2, "UNDERSCORE")
+
 
 rule all:    # specify the final output files
     input:
         expand("fastp/{sample}_filt.fastq.gz", sample=NAMES),
-        expand("minimap2/{sample}.sam", sample=NAMES),
-        expand("samtools/{sample}.bam", sample=NAMES)
+        expand("minimap2/{sample}.{ref}.sam", sample=NAMES, ref=REF),
+        expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF)
 
 rule fastp:    # filter reads
     input:
@@ -25,17 +34,17 @@ rule fastp:    # filter reads
 
 rule minimap2:    # map reads to reference genomes.
     input:
-        ref = "reference_genomes/ref_a.fa",    # only one at the moment, the others will be added
+        ref = "reference_genomes/{ref}.fa",    # all reference genomes
         fastq = "fastp/{sample}_filt.fastq.gz"    # filtered reads
     output:
-        sam = temp("minimap2/{sample}.sam")
+        sam = temp("minimap2/{sample}.{ref}.sam")   # output temporary sam file
     shell:
-        "minimap2 -ax map-ont {input.ref} {input.fastq} > {output.sam}"
+        "minimap2 -ax map-ont {input.ref} {input.fastq} > {output.sam}"   # map reads to reference genomes
 
 rule samtools:
     input:
-        sam = "minimap2/{sample}.sam"
+        sam = "minimap2/{sample}.{ref}.sam"
     output:
-        bam = "samtools/{sample}.bam"
+        bam = "samtools/{sample}.{ref}.bam"
     shell:
         "samtools view -bS {input.sam} | samtools sort -o {output.bam}"
