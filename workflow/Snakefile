@@ -9,17 +9,14 @@ REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference 
 REF = REFERENCE.ref    # extract the reference genome names
 
 
-#test = expand("minimap2/{sample}.{ref}.sam", sample=NAMES, ref=REF)
-#test2 = expand("minimap2/{sample}_{ref}.sam", sample=NAMES, ref=REF)
-#print(test, "PERIOD")
-#print(test2, "UNDERSCORE")
-
-
 rule all:    # specify the final output files
     input:
         expand("fastp/{sample}_filt.fastq.gz", sample=NAMES),
         expand("minimap2/{sample}.{ref}.sam", sample=NAMES, ref=REF),
-        expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF)
+        expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF),
+        expand("samtools/{sample}.{ref}.txt", sample=NAMES, ref=REF)    # output for samtools stats
+        #expand("samtools/data.txt")   #works for one file, but not for all files
+
 
 rule fastp:    # filter reads
     input:
@@ -32,14 +29,16 @@ rule fastp:    # filter reads
     shell:
         "fastp -i {input.fastq} -o {output.fastq} -h {output.report}"
 
+
 rule minimap2:    # map reads to reference genomes.
     input:
         ref = "reference_genomes/{ref}.fa",    # all reference genomes
         fastq = "fastp/{sample}_filt.fastq.gz"    # filtered reads
     output:
-        sam = temp("minimap2/{sample}.{ref}.sam")   # output temporary sam file
+        sam = "minimap2/{sample}.{ref}.sam"   # output temporary sam file
     shell:
         "minimap2 -ax map-ont {input.ref} {input.fastq} > {output.sam}"   # map reads to reference genomes
+
 
 rule samtools:
     input:
@@ -48,3 +47,12 @@ rule samtools:
         bam = "samtools/{sample}.{ref}.bam"
     shell:
         "samtools view -bS {input.sam} | samtools sort -o {output.bam}"
+
+
+rule samtools_stats:
+    input:
+        bam = "samtools/{sample}.{ref}.bam"
+    output:
+        stats = "samtools/{sample}.{ref}.txt"  # Creates one txt file for each mapping. Should be imporved.
+    shell:
+        "samtools stats {input.bam} |grep -i 'error rate' | cut -f 3 > {output.stats}"    # extract error rate from samtools stats output
