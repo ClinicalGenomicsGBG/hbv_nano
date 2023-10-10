@@ -1,7 +1,13 @@
 # data folders
 data/
+
+# output files
 fastp/
 minimap2/
 samtools/
+
+# log files
 logs/
+
+# miscallaneous
 .snakemake/
