@@ -8,14 +8,17 @@ NAMES = FILES.sample    # extract the sample names from the files
 REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference genomes 
 REF = REFERENCE.ref    # extract the reference genome names
 
-
+#dict = {"sample": NAMES, "ref": REF, "error": ""}    # TEST create a dictionary with the sample names and reference genomes
+#print(dict, "testing someting")    # TEST
+#print(dict["sample"], "testing something else")    # TEST
+dict = {"sample": [], "ref": [], "error": []}    # create a dictionary with the sample names and reference genomes
 rule all:    # specify the final output files
     input:
         expand("fastp/{sample}_filt.fastq.gz", sample=NAMES),
         expand("minimap2/{sample}.{ref}.sam", sample=NAMES, ref=REF),
         expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF),
-        expand("samtools/{sample}.{ref}.txt", sample=NAMES, ref=REF)    # output for samtools stats
-        #expand("samtools/data.txt")   #works for one file, but not for all files
+        expand("samtools/{sample}.{ref}.txt", sample=NAMES, ref=REF),    # output for samtools stats
+        "error_rates.csv"    # write error rates to csv file
 
 
 rule fastp:    # filter reads
@@ -53,6 +56,35 @@ rule samtools_stats:
     input:
         bam = "samtools/{sample}.{ref}.bam"
     output:
-        stats = "samtools/{sample}.{ref}.txt"  # Creates one txt file for each mapping. Should be imporved.
+        stats = "samtools/{sample}.{ref}.txt"  # Creates one txt file for each mapping. Should be improved.
     shell:
         "samtools stats {input.bam} |grep -i 'error rate' | cut -f 3 > {output.stats}"    # extract error rate from samtools stats output
+        
+rule collate_error_rates:
+    input:
+        expand('samtools/{sample}.{ref}.txt', sample=NAMES, ref=REF)
+    output:
+        "error_rates.csv"
+    run:
+        with open(output[0], 'w') as out:
+            for path in input:
+                sample = path.split('.')[0].split('/')[1]
+                ref = path.split('.')[1]
+
+                for error in open(path):
+                    out.write(f"{sample},{ref},{error}")
+                
+        print(min({error}), "here is min error")
+                
+""""
+                    dict["sample"].append(sample)
+                    dict["ref"].append(ref)
+                    dict["error"].append(error)
+        print(dict, "here is the dict")
+        print(dict["sample"][0], "here it is")
+        print(dict["ref"][0], "here is ref")
+        print(dict["error"][0], "here is error")
+        print(len(dict), "here is length")
+        print(min(dict["error"]), "here is min error")
+""" 
+#new = {"bc01":[1,2,3,4,5,6,7,8,9], "bc02": [10,11,12,13,14,15,16,17,18]}
