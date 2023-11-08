@@ -6,9 +6,10 @@ fastp/
 minimap2/
 samtools/
 error_rates.csv
+fastp.json
 
 # log files
 logs/
 
-# miscallaneous
+# miscellaneous
 .snakemake/
