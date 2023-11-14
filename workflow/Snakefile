@@ -1,6 +1,7 @@
 # Run in this env.: /medstore/Development/nanopore_HBV/daniel/micromamba/envs/snakemake_hbv
 # Dry run with: snakemake -np
 # Run with e.g.: snakemake -c4
+#!/usr/bin/env python3
 
 FILES = glob_wildcards("data/{sample}.fastq.gz")    # get all fastq files
 NAMES = FILES.sample    # extract the sample names from the files
@@ -8,18 +9,12 @@ NAMES = FILES.sample    # extract the sample names from the files
 REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference genomes 
 REF = REFERENCE.ref    # extract the reference genome names
 
-#dict = {"sample": NAMES, "ref": REF, "error": ""}    # TEST create a dictionary with the sample names and reference genomes
-#print(dict, "testing someting")    # TEST
-#print(dict["sample"], "testing something else")    # TEST
 dict = {"sample": [], "ref": [], "error": []}    # create a dictionary with the sample names and reference genomes
+
 rule all:    # specify the final output files
     input:
-        expand("fastp/{sample}_filt.fastq.gz", sample=NAMES),
-        expand("minimap2/{sample}.{ref}.sam", sample=NAMES, ref=REF),
-        expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF),
-        expand("samtools/{sample}.{ref}.txt", sample=NAMES, ref=REF),    # output for samtools stats
-        "error_rates.csv"    # write error rates to csv file
-
+        expand("fastp/report/{sample}_filt.html", sample=NAMES),   # output fastp report
+        "samtools/minimum_error_rates.csv"
 
 rule fastp:    # filter reads
     input:
@@ -59,12 +54,13 @@ rule samtools_stats:
         stats = "samtools/{sample}.{ref}.txt"  # Creates one txt file for each mapping. Should be improved.
     shell:
         "samtools stats {input.bam} |grep -i 'error rate' | cut -f 3 > {output.stats}"    # extract error rate from samtools stats output
-        
+
+
 rule collate_error_rates:
     input:
         expand('samtools/{sample}.{ref}.txt', sample=NAMES, ref=REF)
     output:
-        "error_rates.csv"
+        "samtools/error_rates.csv"
     run:
         with open(output[0], 'w') as out:
             for path in input:
@@ -73,18 +69,14 @@ rule collate_error_rates:
 
                 for error in open(path):
                     out.write(f"{sample},{ref},{error}")
-                
-        print(min({error}), "here is min error")
-                
-""""
-                    dict["sample"].append(sample)
-                    dict["ref"].append(ref)
-                    dict["error"].append(error)
-        print(dict, "here is the dict")
-        print(dict["sample"][0], "here it is")
-        print(dict["ref"][0], "here is ref")
-        print(dict["error"][0], "here is error")
-        print(len(dict), "here is length")
-        print(min(dict["error"]), "here is min error")
-""" 
-#new = {"bc01":[1,2,3,4,5,6,7,8,9], "bc02": [10,11,12,13,14,15,16,17,18]}
+
+
+rule minimum_error_rates:
+    input:
+        "samtools/error_rates.csv"
+    output:
+        "samtools/minimum_error_rates.csv"
+    #shell:
+    #    "python3 workflow/scripts/error_rate.py {input} {output}"
+    script:
+        "scripts/error_rate.py"
