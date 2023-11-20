@@ -14,7 +14,7 @@ dict = {"sample": [], "ref": [], "error": []}    # create a dictionary with the 
 rule all:    # specify the final output files
     input:
         expand("fastp/report/{sample}_filt.html", sample=NAMES),   # output fastp report
-        "samtools/minimum_error_rates.csv"
+        "samtools/minimum_error_rates.csv"    # output minimum error rates
 
 rule fastp:    # filter reads
     input:
