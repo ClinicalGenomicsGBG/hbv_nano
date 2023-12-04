@@ -5,6 +5,7 @@ data/
 fastp/
 minimap2/
 samtools/
+consensus/
 error_rates.csv
 fastp.json
 
@@ -13,3 +14,4 @@ logs/
 
 # miscellaneous
 .snakemake/
+workflow/scripts/test.py

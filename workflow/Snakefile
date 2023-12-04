@@ -1,7 +1,10 @@
 # Run in this env.: /medstore/Development/nanopore_HBV/daniel/micromamba/envs/snakemake_hbv
 # Dry run with: snakemake -np
 # Run with e.g.: snakemake -c4
+
 #!/usr/bin/env python3
+
+import pandas as pd
 
 FILES = glob_wildcards("data/{sample}.fastq.gz")    # get all fastq files
 NAMES = FILES.sample    # extract the sample names from the files
@@ -9,12 +12,16 @@ NAMES = FILES.sample    # extract the sample names from the files
 REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference genomes 
 REF = REFERENCE.ref    # extract the reference genome names
 
-dict = {"sample": [], "ref": [], "error": []}    # create a dictionary with the sample names and reference genomes
+df = pd.read_csv("/medstore/Development/nanopore_HBV/daniel/hbv_nano/samtools/minimum_error_rates_2.csv", header=None)
+BAMFILES = df.iloc[:,0].tolist()
+
+#BAMFILES = ["bc13.ref_c.bam", "bc14.ref_d.bam", "bc15.ref_d.bam", "bc16.ref_c.bam", "bc17.ref_d.bam", "bc18_neg_ctrl.ref_c.bam"]    # this should be replaced by reading in the bam files from a csv.
 
 rule all:    # specify the final output files
     input:
         expand("fastp/report/{sample}_filt.html", sample=NAMES),   # output fastp report
-        "samtools/minimum_error_rates.csv"    # output minimum error rates
+        expand("consensus/{bam}.fa", bam=BAMFILES)
+        #expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF)    # output consensus sequences
 
 rule fastp:    # filter reads
     input:
@@ -75,8 +82,36 @@ rule minimum_error_rates:
     input:
         "samtools/error_rates.csv"
     output:
-        "samtools/minimum_error_rates.csv"
-    #shell:
-    #    "python3 workflow/scripts/error_rate.py {input} {output}"
+        "samtools/minimum_error_rates.csv",
+        "samtools/minimum_error_rates_2.csv"
     script:
-        "scripts/error_rate.py"
+        "scripts/error_rate.py"                                                                                              
+
+
+rule consensus:
+    input:
+        bam = "samtools/{bam}"
+    output:
+        fasta = "consensus/{bam}.fa"
+    shell:
+        "samtools consensus -m simple -d20 {input.bam} > {output.fasta}"
+
+
+#testing stuff
+#VAR = 100
+
+#rule test:
+#    #input: "a.in"
+#    #output: "a.out"
+#    params:
+#        var=VAR  # pass the variable value as "var"
+#    script: "scripts/test.py"
+
+#print(VAR, "edited")
+
+#def print_var():
+#    print(VAR, "edited")
+#
+#rule print_var:
+#    run:
+#        print_var()
