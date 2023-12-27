@@ -6,28 +6,34 @@
 
 import pandas as pd
 
+global files
+
 FILES = glob_wildcards("data/{sample}.fastq.gz")    # get all fastq files
-NAMES = FILES.sample    # extract the sample names from the files
+NAMES = FILES.sample    # extract sample names
 
 REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference genomes 
-REF = REFERENCE.ref    # extract the reference genome names
+REF = REFERENCE.ref    # extract reference genome names
 
-df = pd.read_csv("/medstore/Development/nanopore_HBV/daniel/hbv_nano/samtools/minimum_error_rates_2.csv", header=None)
-BAMFILES = df.iloc[:,0].tolist()
+#Only works if minimum_error_rates_2.csv has been created prior to rule all.
+#df = pd.read_csv("samtools/minimum_error_rates_2.csv", header=None)
+#BAMFILES = df.iloc[:,0].tolist()
 
-#BAMFILES = ["bc13.ref_c.bam", "bc14.ref_d.bam", "bc15.ref_d.bam", "bc16.ref_c.bam", "bc17.ref_d.bam", "bc18_neg_ctrl.ref_c.bam"]    # this should be replaced by reading in the bam files from a csv.
+#hardcoded (for now)
+#BAMFILES = ["bc13.ref_c.bam", "bc14.ref_d.bam", "bc15.ref_d.bam", "bc16.ref_c.bam", "bc17.ref_d.bam", "bc18_neg_ctrl.ref_c.bam"]
 
 rule all:    # specify the final output files
     input:
         expand("fastp/report/{sample}_filt.html", sample=NAMES),   # output fastp report
-        expand("consensus/{bam}.fa", bam=BAMFILES)
-        #expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF)    # output consensus sequences
+        "samtools/minimum_error_rates.csv",    #output csv file: bc**,ref_*,*.****
+        "samtools/minimum_error_rates_2.csv",   #output csv file: bc**-ref_*.bam
+        expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF),    # output sorted bam files
+        expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # output consensus sequence
 
 rule fastp:    # filter reads
     input:
-        fastq = "data/{sample}.fastq.gz"
+        fastq = "data/{sample}.fastq.gz"    # get all fastq files
     output: 
-        fastq = "fastp/{sample}_filt.fastq.gz",    # output filtered read
+        fastq = "fastp/{sample}_filt.fastq.gz",    # output filtered reads
         report = "fastp/report/{sample}_filt.html"       # output fastp report
     log:
         "logs/fastp/{sample}.log"
@@ -35,39 +41,39 @@ rule fastp:    # filter reads
         "fastp -i {input.fastq} -o {output.fastq} -h {output.report}"
 
 
-rule minimap2:    # map reads to reference genomes.
+rule minimap2:    # map reads to reference genomes
     input:
         ref = "reference_genomes/{ref}.fa",    # all reference genomes
         fastq = "fastp/{sample}_filt.fastq.gz"    # filtered reads
     output:
-        sam = "minimap2/{sample}.{ref}.sam"   # output temporary sam file
+        sam = "minimap2/{sample}.{ref}.sam"   # output sam files
     shell:
         "minimap2 -ax map-ont {input.ref} {input.fastq} > {output.sam}"   # map reads to reference genomes
 
 
-rule samtools:
+rule samtools:    # convert sam to bam and sort
     input:
-        sam = "minimap2/{sample}.{ref}.sam"
+        sam = "minimap2/{sample}.{ref}.sam"    # all sam files
     output:
-        bam = "samtools/{sample}.{ref}.bam"
+        bam = "samtools/{sample}.{ref}.bam"    # sorted bam files
     shell:
         "samtools view -bS {input.sam} | samtools sort -o {output.bam}"
 
 
-rule samtools_stats:
+rule samtools_stats:    # get error rate for each sample and reference genome
     input:
-        bam = "samtools/{sample}.{ref}.bam"
+        bam = "samtools/{sample}.{ref}.bam"    # all bam files
     output:
-        stats = "samtools/{sample}.{ref}.txt"  # Creates one txt file for each mapping. Should be improved.
+        stats = "samtools/{sample}.{ref}.txt"  # output the error rate for each sample and reference genome
     shell:
-        "samtools stats {input.bam} |grep -i 'error rate' | cut -f 3 > {output.stats}"    # extract error rate from samtools stats output
+        "samtools stats {input.bam} |grep -i 'error rate' | cut -f 3 > {output.stats}"    # extract error rates from samtools stats output and write to txt files
 
 
-rule collate_error_rates:
+rule collate_error_rates:    # collate error rates from all samples and reference genomes
     input:
         expand('samtools/{sample}.{ref}.txt', sample=NAMES, ref=REF)
     output:
-        "samtools/error_rates.csv"
+        "samtools/error_rates.csv"    # all error rates
     run:
         with open(output[0], 'w') as out:
             for path in input:
@@ -75,10 +81,10 @@ rule collate_error_rates:
                 ref = path.split('.')[1]
 
                 for error in open(path):
-                    out.write(f"{sample},{ref},{error}")
+                    out.write(f"{sample},{ref},{error}")    # write error rates to csv file [sample, reference genome, error rate]
 
 
-rule minimum_error_rates:
+rule minimum_error_rates:    # get minimum error rate for each sample
     input:
         "samtools/error_rates.csv"
     output:
@@ -87,14 +93,34 @@ rule minimum_error_rates:
     script:
         "scripts/error_rate.py"                                                                                              
 
-
+#works but creates consensus for all files
 rule consensus:
     input:
-        bam = "samtools/{bam}"
+        bam = "samtools/{sample}.{ref}.bam"
     output:
-        fasta = "consensus/{bam}.fa"
+        fasta = "consensus/{sample}.{ref}.fa"
     shell:
         "samtools consensus -m simple -d20 {input.bam} > {output.fasta}"
+
+#rule copy_bams:
+#    input:
+#        "samtools/minimum_error_rates.csv"
+#    output:
+#        directory("keep")
+#    script:
+#        "scripts/copy_bams.py"
+
+
+########################################
+#print the bamfiles
+#rule print_bamfiles:
+#    input:
+#        "samtools/minimum_error_rates_2.csv"
+#    run:
+#        import pandas as pd
+#        df = pd.read_csv("samtools/minimum_error_rates_2.csv", header=None)
+#        files = df.iloc[:, 0].tolist()
+#        print(files)
 
 
 #testing stuff
