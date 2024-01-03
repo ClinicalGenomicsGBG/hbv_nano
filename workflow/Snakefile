@@ -28,6 +28,8 @@ rule all:    # specify the final output files
         "samtools/minimum_error_rates_2.csv",   #output csv file: bc**-ref_*.bam
         expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF),    # output sorted bam files
         expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # output consensus sequence
+        expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF),
+        #expand("consensus/medaka/{sample}.{ref}/variants.vcf", sample=NAMES, ref=REF)
 
 rule fastp:    # filter reads
     input:
@@ -35,6 +37,8 @@ rule fastp:    # filter reads
     output: 
         fastq = "fastp/{sample}_filt.fastq.gz",    # output filtered reads
         report = "fastp/report/{sample}_filt.html"       # output fastp report
+    singularity:
+        "images/fastp.img"    # v. 0.23.4
     log:
         "logs/fastp/{sample}.log"
     shell:
@@ -101,6 +105,32 @@ rule consensus:
         fasta = "consensus/{sample}.{ref}.fa"
     shell:
         "samtools consensus -m simple -d20 {input.bam} > {output.fasta}"
+
+rule medaka:
+    input:
+        fastq = "fastp/{sample}_filt.fastq.gz",
+        fasta = "consensus/{sample}.{ref}.fa"
+    params:
+        model = "r1041_e82_400bps_sup_g615"
+    output:
+        #fasta_medaka = "consensus/medaka/{sample}.{ref}.medaka.fa"
+        fasta_medaka = directory("consensus/medaka/{sample}.{ref}")
+    singularity:
+        "images/medaka_1.11.3.img"
+    shell:
+        #"medaka_consensus -i {input.fastq} -d {input.fasta} -o {output.fasta_medaka} -m r1041_e82_400bps_sup_g615"
+        "medaka_consensus -g -r N -i {input.fastq} -d {input.fasta} -o {output.fasta_medaka} -m {params.model}"
+
+#rule medaka_variant:
+#    input:
+#        fastq = "fastp/{sample}_filt.fastq.gz",
+#        fasta = "consensus/medaka/{sample}.{ref}/consensus.fasta"
+#    output:
+#        vcf = "consensus/medaka/{sample}.{ref}/variants.vcf"
+#    singularity:
+#        "images/medaka_1.11.3.img"
+#    shell:
+#        "medaka_haploid_variant -i {input.fastq} -d {input.fasta} -o {output.vcf} -m r1041_e82_400bps_sup_g615"
 
 #rule copy_bams:
 #    input:

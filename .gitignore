@@ -9,9 +9,14 @@ consensus/
 error_rates.csv
 fastp.json
 
+# images
+images/
+
 # log files
 logs/
 
 # miscellaneous
 .snakemake/
 workflow/scripts/test.py
+.keras/keras.json
+.vscode/settings.json
