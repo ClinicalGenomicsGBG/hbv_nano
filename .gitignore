@@ -18,5 +18,5 @@ logs/
 # miscellaneous
 .snakemake/
 workflow/scripts/test.py
-.keras/keras.json
-.vscode/settings.json
+.keras/
+.vscode/

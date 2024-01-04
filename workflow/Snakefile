@@ -23,12 +23,12 @@ REF = REFERENCE.ref    # extract reference genome names
 
 rule all:    # specify the final output files
     input:
-        expand("fastp/report/{sample}_filt.html", sample=NAMES),   # output fastp report
-        "samtools/minimum_error_rates.csv",    #output csv file: bc**,ref_*,*.****
-        "samtools/minimum_error_rates_2.csv",   #output csv file: bc**-ref_*.bam
-        expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF),    # output sorted bam files
-        expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # output consensus sequence
-        expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF),
+        expand("fastp/report/{sample}_filt.html", sample=NAMES),   # fastp report
+        "samtools/minimum_error_rates.csv",    # minimum error rates [bc**,ref_*,*.****]
+        #"samtools/minimum_error_rates_2.csv",   # minimum error rates 2 [bc**-ref_*.bam]
+        expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF),    # sorted bam files
+        expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # consensus sequences
+        expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF),    # medaka consensus sequences
         #expand("consensus/medaka/{sample}.{ref}/variants.vcf", sample=NAMES, ref=REF)
 
 rule fastp:    # filter reads
@@ -97,8 +97,8 @@ rule minimum_error_rates:    # get minimum error rate for each sample
     script:
         "scripts/error_rate.py"                                                                                              
 
-#works but creates consensus for all files
-rule consensus:
+
+rule consensus:    # generate consensus sequences
     input:
         bam = "samtools/{sample}.{ref}.bam"
     output:
@@ -113,13 +113,11 @@ rule medaka:
     params:
         model = "r1041_e82_400bps_sup_g615"
     output:
-        #fasta_medaka = "consensus/medaka/{sample}.{ref}.medaka.fa"
         fasta_medaka = directory("consensus/medaka/{sample}.{ref}")
     singularity:
         "images/medaka_1.11.3.img"
     shell:
-        #"medaka_consensus -i {input.fastq} -d {input.fasta} -o {output.fasta_medaka} -m r1041_e82_400bps_sup_g615"
-        "medaka_consensus -g -r N -i {input.fastq} -d {input.fasta} -o {output.fasta_medaka} -m {params.model}"
+        "medaka_consensus -r N -i {input.fastq} -d {input.fasta} -o {output.fasta_medaka} -m {params.model}"
 
 #rule medaka_variant:
 #    input:
@@ -139,35 +137,3 @@ rule medaka:
 #        directory("keep")
 #    script:
 #        "scripts/copy_bams.py"
-
-
-########################################
-#print the bamfiles
-#rule print_bamfiles:
-#    input:
-#        "samtools/minimum_error_rates_2.csv"
-#    run:
-#        import pandas as pd
-#        df = pd.read_csv("samtools/minimum_error_rates_2.csv", header=None)
-#        files = df.iloc[:, 0].tolist()
-#        print(files)
-
-
-#testing stuff
-#VAR = 100
-
-#rule test:
-#    #input: "a.in"
-#    #output: "a.out"
-#    params:
-#        var=VAR  # pass the variable value as "var"
-#    script: "scripts/test.py"
-
-#print(VAR, "edited")
-
-#def print_var():
-#    print(VAR, "edited")
-#
-#rule print_var:
-#    run:
-#        print_var()
