@@ -1,0 +1,4 @@
+# singularity images
+
+fastp: "images/fastp.img"
+medaka: "images/medaka_1.11.3.img"
