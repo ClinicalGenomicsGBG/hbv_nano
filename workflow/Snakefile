@@ -41,7 +41,6 @@ rule fastp:    # filter reads
         report = "fastp/report/{sample}_filt.html"       # output fastp report
     singularity:
         config["fastp"]
-        #"images/fastp.img"    # v. 0.23.4
     log:
         "logs/fastp/{sample}.log"
     shell:
@@ -54,6 +53,8 @@ rule minimap2:    # map reads to reference genomes
         fastq = "fastp/{sample}_filt.fastq.gz"    # filtered reads
     output:
         sam = "minimap2/{sample}.{ref}.sam"   # output sam files
+    singularity:
+        config["minimap2"]
     shell:
         "minimap2 -ax map-ont {input.ref} {input.fastq} > {output.sam}"   # map reads to reference genomes
 
@@ -63,6 +64,8 @@ rule samtools:    # convert sam to bam and sort
         sam = "minimap2/{sample}.{ref}.sam"    # all sam files
     output:
         bam = "samtools/{sample}.{ref}.bam"    # sorted bam files
+    singularity:
+        config["samtools"]
     shell:
         "samtools view -bS {input.sam} | samtools sort -o {output.bam}"
 
@@ -72,6 +75,8 @@ rule samtools_stats:    # get error rate for each sample and reference genome
         bam = "samtools/{sample}.{ref}.bam"    # all bam files
     output:
         stats = "samtools/{sample}.{ref}.txt"  # output the error rate for each sample and reference genome
+    singularity:
+        config["samtools"]
     shell:
         "samtools stats {input.bam} |grep -i 'error rate' | cut -f 3 > {output.stats}"    # extract error rates from samtools stats output and write to txt files
 
@@ -106,6 +111,8 @@ rule consensus:    # generate consensus sequences
         bam = "samtools/{sample}.{ref}.bam"
     output:
         fasta = "consensus/{sample}.{ref}.fa"
+    singularity:
+        config["samtools"]
     shell:
         "samtools consensus -m simple -d20 {input.bam} > {output.fasta}"
 
@@ -119,7 +126,6 @@ rule medaka:
         fasta_medaka = directory("consensus/medaka/{sample}.{ref}")
     singularity:
         config["medaka"]
-        #"images/medaka_1.11.3.img"
     shell:
         "medaka_consensus -r N -i {input.fastq} -d {input.fasta} -o {output.fasta_medaka} -m {params.model}"
 

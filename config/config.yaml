@@ -1,4 +1,6 @@
 # singularity images
 
-fastp: "images/fastp.img"
+fastp: "images/fastp_0.23.4.img"
+minimap2: "images/minimap2_2.26.img"
+samtools: "images/samtools_1.18.img"
 medaka: "images/medaka_1.11.3.img"
