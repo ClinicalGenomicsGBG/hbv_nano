@@ -10,7 +10,7 @@ global files
 
 configfile: "config/config.yaml"
 
-FILES = glob_wildcards("data/{sample}.fastq.gz")    # get all fastq files
+FILES = glob_wildcards(config["fastq_folder"] + "/{sample}.fastq.gz")    # get all fastq files
 NAMES = FILES.sample    # extract sample names
 
 REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference genomes 
