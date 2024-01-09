@@ -32,6 +32,9 @@ rule all:    # specify the final output files
         expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # consensus sequences
         expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF),    # medaka consensus sequences
         #expand("consensus/medaka/{sample}.{ref}/variants.vcf", sample=NAMES, ref=REF)
+        #directory("output")
+        "output/copy_files_done.txt"
+
 
 rule fastp:    # filter reads
     input:
@@ -116,6 +119,7 @@ rule consensus:    # generate consensus sequences
     shell:
         "samtools consensus -m simple -d20 {input.bam} > {output.fasta}"
 
+
 rule medaka:
     input:
         fastq = "fastp/{sample}_filt.fastq.gz",
@@ -140,10 +144,11 @@ rule medaka:
 #    shell:
 #        "medaka_haploid_variant -i {input.fastq} -d {input.fasta} -o {output.vcf} -m r1041_e82_400bps_sup_g615"
 
-#rule copy_bams:
-#    input:
-#        "samtools/minimum_error_rates.csv"
-#    output:
-#        directory("keep")
-#    script:
-#        "scripts/copy_bams.py"
+rule copy_bams:
+    input:
+        "samtools/minimum_error_rates.csv",
+        expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF)
+    output:
+        "output/copy_files_done.txt"
+    script:
+        "scripts/copy_bams.py"

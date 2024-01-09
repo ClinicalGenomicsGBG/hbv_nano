@@ -4,14 +4,20 @@ import pandas as pd
 import shutil
 import os
 
-def copy_bam_files():
+def copy_files():
     df = pd.read_csv('samtools/minimum_error_rates.csv')
-    for index, row in df.iterrows():
+    for _, row in df.iterrows():
         read_id = row['read_id']
         ref = row['ref']
         bam_file = f'samtools/{read_id}.{ref}.bam'
-        if not os.path.exists('keep'):
-            os.makedirs('keep')
-        shutil.copy(bam_file, 'keep/')
+        medaka_dir = f'consensus/medaka/{read_id}.{ref}'
+        output_dir = f'output/medaka/{read_id}.{ref}'
+        if not os.path.exists('output'):
+            os.makedirs('output')
+        shutil.copy(bam_file, 'output')
+        shutil.copytree(medaka_dir, output_dir)
 
-copy_bam_files()
+    with open('output/copy_files_done.txt', 'w') as f:
+        f.write('copy_bams done')
+
+copy_files()                                                                       
