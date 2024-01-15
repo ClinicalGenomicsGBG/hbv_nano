@@ -4,6 +4,7 @@
 
 #!/usr/bin/env python3
 
+
 import pandas as pd
 
 global files
@@ -31,8 +32,7 @@ rule all:    # specify the final output files
         expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF),    # sorted bam files
         expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # consensus sequences
         expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF),    # medaka consensus sequences
-        #expand("consensus/medaka/{sample}.{ref}/variants.vcf", sample=NAMES, ref=REF)
-        #directory("output")
+        expand("consensus/medaka/variants/{sample}.{ref}", sample=NAMES, ref=REF),
         "output/copy_files_done.txt"
 
 
@@ -133,22 +133,22 @@ rule medaka:
     shell:
         "medaka_consensus -r N -i {input.fastq} -d {input.fasta} -o {output.fasta_medaka} -m {params.model}"
 
-#rule medaka_variant:
-#    input:
-#        fastq = "fastp/{sample}_filt.fastq.gz",
-#        fasta = "consensus/medaka/{sample}.{ref}/consensus.fasta"
-#    output:
-#        vcf = "consensus/medaka/{sample}.{ref}/variants.vcf"
-#    singularity:
-#        "images/medaka_1.11.3.img"
-#    shell:
-#        "medaka_haploid_variant -i {input.fastq} -d {input.fasta} -o {output.vcf} -m r1041_e82_400bps_sup_g615"
+rule medaka_variant:
+    input:
+        fastq = "fastp/{sample}_filt.fastq.gz",
+        fasta = "consensus/medaka/{sample}.{ref}/consensus.fasta"
+    output:
+        vcf = directory("consensus/medaka/variants/{sample}.{ref}")
+    singularity:
+        "images/medaka_1.11.3.img"
+    shell:
+        "medaka_haploid_variant -i {input.fastq} -r {input.fasta} -o {output.vcf} -m r1041_e82_400bps_sup_g615"
 
-rule copy_bams:
+rule copy_files:
     input:
         "samtools/minimum_error_rates.csv",
         expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF)
     output:
         "output/copy_files_done.txt"
     script:
-        "scripts/copy_bams.py"
+        "scripts/copy_files.py"
