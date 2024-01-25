@@ -33,7 +33,8 @@ rule all:    # specify the final output files
         expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # consensus sequences
         expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF),    # medaka consensus sequences
         expand("consensus/medaka/variants/{sample}.{ref}", sample=NAMES, ref=REF),
-        "output/copy_files_done.txt"
+        "output/copy_files_done.txt",
+        "output/qc.csv"    # read counts
 
 
 rule fastp:    # filter reads
@@ -152,3 +153,12 @@ rule copy_files:
         "output/copy_files_done.txt"
     script:
         "scripts/copy_files.py"
+
+rule qc:
+    input:
+        "output/copy_files_done.txt",
+        #expand("output/{sample}.{ref}_medaka.fa", sample=NAMES, ref=REF)
+    output:
+        "output/qc.csv"
+    script:
+        "scripts/qc.py"
