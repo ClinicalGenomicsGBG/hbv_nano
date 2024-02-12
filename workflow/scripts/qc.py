@@ -4,24 +4,24 @@ import os
 import gzip
 import pandas as pd
 
-def count_reads(fastq):
+### QC of the negative control and sample(s) ###
+def count_reads(fastq):    # read count of each fastq
     with gzip.open(fastq, 'rt') as f:
         num_lines = sum(1 for line in f)
     return num_lines // 4
 
-fastq_files = [f for f in os.listdir('fastp') if f.endswith('_filt.fastq.gz')]
+fastq_files = [f for f in os.listdir('fastp') if f.endswith('_filt.fastq.gz')]    # get fastq files
+samples = [f.replace('_filt.fastq.gz', '') for f in fastq_files]    # extract sample names from fastq files
 
-samples = [f.replace('_filt.fastq.gz', '') for f in fastq_files]    # get filenames
-reads = [count_reads(f'fastp/{f}') for f in fastq_files]
+reads = [count_reads(f'fastp/{f}') for f in fastq_files]    # count the number of reads in each fastq file
 
 data = {'sample': samples, 'reads': reads}
-
 df = pd.DataFrame(data)
 
 reads_neg_ctrl = df.loc[df['sample'].str.contains('neg_ctrl'), 'reads'].values[0]
 df['reads neg_ctrl/reads sample'] = round(reads_neg_ctrl / df['reads'], 3)
 
-df['qc_pass_ctrl'] = df['reads neg_ctrl/reads sample'] <= 0.1    # check if the reads for the samples are less or equal 10% of the negative control reads
+df['qc_pass_ctrl'] = df['reads neg_ctrl/reads sample'] <= 0.1
 
 qc_check = df['qc_pass_ctrl'].sum() >= len(df) - 1   # check if all samples (except the negative control) has passed the QC
 
@@ -30,6 +30,7 @@ if qc_check == True:
 else:
     print("ERROR: At least one sample has failed the QC")
 
+#### QC of coverage of the RT region ###
 consensus_in = [f for f in os.listdir('output') if f.endswith('_medaka.fa')]
 
 for filename in consensus_in:

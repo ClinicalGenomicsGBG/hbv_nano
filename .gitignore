@@ -7,8 +7,11 @@ minimap2/
 samtools/
 consensus/
 output/
+freebayes/
 error_rates.csv
 fastp.json
+reference_genomes/*.fai
+reference_genomes/*.mmi
 
 # images
 images/
@@ -19,5 +22,6 @@ logs/
 # miscellaneous
 .snakemake/
 workflow/scripts/test.py
+workflow/scripts/vcf_treatment.py
 .keras/
 .vscode/

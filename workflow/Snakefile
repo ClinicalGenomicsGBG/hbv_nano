@@ -27,12 +27,14 @@ REF = REFERENCE.ref    # extract reference genome names
 rule all:    # specify the final output files
     input:
         expand("fastp/report/{sample}_filt.html", sample=NAMES),   # fastp report
+        expand("fastp/{sample}_filt.fastq.gz", sample=NAMES),    # filtered reads
         "samtools/minimum_error_rates.csv",    # minimum error rates [bc**,ref_*,*.****]
         #"samtools/minimum_error_rates_2.csv",   # minimum error rates 2 [bc**-ref_*.bam]
         expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF),    # sorted bam files
         expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # consensus sequences
         expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF),    # medaka consensus sequences
-        expand("consensus/medaka/variants/{sample}.{ref}", sample=NAMES, ref=REF),
+        #expand("consensus/medaka/variants/{sample}.{ref}", sample=NAMES, ref=REF), ##COMMENT OUT IF NOT WORKING
+        expand("freebayes/{sample}.{ref}.vcf", sample=NAMES, ref=REF),    # variant calling
         "output/copy_files_done.txt",
         "output/qc.csv"    # read counts
 
@@ -42,7 +44,7 @@ rule fastp:    # filter reads
         fastq = "data/{sample}.fastq.gz"    # get all fastq files
     output: 
         fastq = "fastp/{sample}_filt.fastq.gz",    # output filtered reads
-        report = "fastp/report/{sample}_filt.html"       # output fastp report
+        report = "fastp/report/{sample}_filt.html"    # output fastp report
     singularity:
         config["fastp"]
     log:
@@ -105,7 +107,7 @@ rule minimum_error_rates:    # get minimum error rate for each sample
         "samtools/error_rates.csv"
     output:
         "samtools/minimum_error_rates.csv",
-        "samtools/minimum_error_rates_2.csv"
+        #"samtools/minimum_error_rates_2.csv"
     script:
         "scripts/error_rate.py"                                                                                              
 
@@ -134,16 +136,16 @@ rule medaka:
     shell:
         "medaka_consensus -r N -i {input.fastq} -d {input.fasta} -o {output.fasta_medaka} -m {params.model}"
 
-rule medaka_variant:
+rule freebayes:
     input:
-        fastq = "fastp/{sample}_filt.fastq.gz",
-        fasta = "consensus/medaka/{sample}.{ref}/consensus.fasta"
+        bam = "samtools/{sample}.{ref}.bam",
+        ref = "reference_genomes/{ref}.fa"
     output:
-        vcf = directory("consensus/medaka/variants/{sample}.{ref}")
+        vcf = "freebayes/{sample}.{ref}.vcf"
     singularity:
-        "images/medaka_1.11.3.img"
-    shell:
-        "medaka_haploid_variant -i {input.fastq} -r {input.fasta} -o {output.vcf} -m r1041_e82_400bps_sup_g615"
+        config["freebayes"]
+    shell:  
+        "freebayes -f {input.ref} {input.bam} > {output.vcf}"
 
 rule copy_files:
     input:
