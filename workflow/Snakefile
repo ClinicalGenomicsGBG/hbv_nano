@@ -156,6 +156,17 @@ rule copy_files:
     script:
         "scripts/copy_files.py"
 
+'''
+rule vcf_manipulation:
+    input:
+        "samtolls/minimum_error_rates.csv",
+        expand("freebayes/{sample}.{ref}.vcf", sample=NAMES, ref=REF)
+    output:
+        vcf_out = "freebayes/{sample}.{ref}_edit.vcf"
+    script:
+        "scripts/vcf_pandas.py"
+'''
+
 rule qc:
     input:
         "output/copy_files_done.txt",
