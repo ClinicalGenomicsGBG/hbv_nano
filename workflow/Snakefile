@@ -168,7 +168,7 @@ rule vcf_modification:
     output:
         "output/vcf_modifications_done.txt"   
     script:
-        "scripts/vcf_pandas.py"
+        "scripts/vcf_modification.py"
 
 
 rule qc:
