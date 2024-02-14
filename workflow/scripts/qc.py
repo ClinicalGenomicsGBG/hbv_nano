@@ -4,7 +4,7 @@ import os
 import gzip
 import pandas as pd
 
-### QC of the negative control and sample(s) ###
+# QC of the negative control and sample(s)
 def count_reads(fastq):    # read count of each fastq
     with gzip.open(fastq, 'rt') as f:
         num_lines = sum(1 for line in f)
@@ -30,7 +30,7 @@ if qc_check == True:
 else:
     print("ERROR: At least one sample has failed the QC")
 
-#### QC of coverage of the RT region ###
+# QC of coverage of the RT region
 consensus_in = [f for f in os.listdir('output') if f.endswith('_medaka.fa')]
 
 for filename in consensus_in:

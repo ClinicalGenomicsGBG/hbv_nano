@@ -4,6 +4,7 @@ import pandas as pd
 import shutil
 import os
 
+# Copy all files relevant for the clinic to the output folder
 def copy_files():
     df = pd.read_csv('samtools/minimum_error_rates.csv')
     for _, row in df.iterrows():
@@ -16,7 +17,7 @@ def copy_files():
         if not os.path.exists('output'):
             os.makedirs('output')
 
-        # change headers of consensus files and write to output folder
+        # Change headers of consensus files and write to output folder
         with open(consensus_in, 'r') as in_fasta, open(consensus_out, 'w') as out_fa:
             for line in in_fasta:
                 if line.startswith('>'):
@@ -24,13 +25,13 @@ def copy_files():
                 else:
                     out_fa.write(line)
         
-        # copy variant files to output folder
+        # Copy variant files to output folder
         #variant_in = f'consensus/medaka/variants/{read_id}.{ref}/medaka.vcf'
         #variant_out = f'output/{read_id}.{ref}_medaka.vcf'
 
         #shutil.copy(variant_in, variant_out)
 
     with open('output/copy_files_done.txt', 'w') as f:
-        f.write('file copying done')
+        f.write('All files were copied to the output folder!')
 
 copy_files()                                                                       
