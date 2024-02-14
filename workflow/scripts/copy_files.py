@@ -26,9 +26,8 @@ def copy_files():
                     out_fa.write(line)
         
         # Copy variant files to output folder
-        #variant_in = f'consensus/medaka/variants/{read_id}.{ref}/medaka.vcf'
-        #variant_out = f'output/{read_id}.{ref}_medaka.vcf'
-
+        #variant_in = f'freebayes/{read_id}.{ref}_edit.vcf'
+        #variant_out = f'output/{read_id}.{ref}.vcf'
         #shutil.copy(variant_in, variant_out)
 
     with open('output/copy_files_done.txt', 'w') as f:

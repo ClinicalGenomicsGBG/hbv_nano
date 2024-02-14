@@ -17,31 +17,23 @@ NAMES = FILES.sample    # extract sample names
 REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference genomes 
 REF = REFERENCE.ref    # extract reference genome names
 
-#Only works if minimum_error_rates_2.csv has been created prior to rule all.
-#df = pd.read_csv("samtools/minimum_error_rates_2.csv", header=None)
-#BAMFILES = df.iloc[:,0].tolist()
-
-#hardcoded (for now)
-#BAMFILES = ["bc13.ref_c.bam", "bc14.ref_d.bam", "bc15.ref_d.bam", "bc16.ref_c.bam", "bc17.ref_d.bam", "bc18_neg_ctrl.ref_c.bam"]
 
 rule all:    # specify the final output files
     input:
         expand("fastp/report/{sample}_filt.html", sample=NAMES),   # fastp report
         expand("fastp/{sample}_filt.fastq.gz", sample=NAMES),    # filtered reads
         "samtools/minimum_error_rates.csv",    # minimum error rates [bc**,ref_*,*.****]
-        #"samtools/minimum_error_rates_2.csv",   # minimum error rates 2 [bc**-ref_*.bam]
         expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF),    # sorted bam files
         expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # consensus sequences
         expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF),    # medaka consensus sequences
-        #expand("consensus/medaka/variants/{sample}.{ref}", sample=NAMES, ref=REF), ##COMMENT OUT IF NOT WORKING
         expand("freebayes/{sample}.{ref}.vcf", sample=NAMES, ref=REF),    # variant calling
         "output/copy_files_done.txt",
         "output/vcf_modifications_done.txt",
-        "output/qc.csv",    # read counts
-        #expand("freebayes/{sample}.{ref}_edit.vcf", sample=NAMES, ref=REF)
+        "output/qc.csv",    # quality control file
 
 
-rule fastp:    # filter reads
+# Preprocess the fastq files
+rule fastp:
     input:
         fastq = "data/{sample}.fastq.gz"    # get all fastq files
     output: 
@@ -55,7 +47,8 @@ rule fastp:    # filter reads
         "fastp -i {input.fastq} -o {output.fastq} -h {output.report}"
 
 
-rule minimap2:    # map reads to reference genomes
+# Map the reads to the reference genomes
+rule minimap2:
     input:
         ref = "reference_genomes/{ref}.fa",    # all reference genomes
         fastq = "fastp/{sample}_filt.fastq.gz"    # filtered reads
@@ -67,7 +60,8 @@ rule minimap2:    # map reads to reference genomes
         "minimap2 -ax map-ont {input.ref} {input.fastq} > {output.sam}"   # map reads to reference genomes
 
 
-rule samtools:    # convert sam to bam and sort
+# Convert the bam files to samfiles and sort
+rule samtools:
     input:
         sam = "minimap2/{sample}.{ref}.sam"    # all sam files
     output:
@@ -78,7 +72,8 @@ rule samtools:    # convert sam to bam and sort
         "samtools view -bS {input.sam} | samtools sort -o {output.bam}"
 
 
-rule samtools_stats:    # get error rate for each sample and reference genome
+# Get the error rates for each sample and reference genome
+rule samtools_stats:
     input:
         bam = "samtools/{sample}.{ref}.bam"    # all bam files
     output:
@@ -89,7 +84,8 @@ rule samtools_stats:    # get error rate for each sample and reference genome
         "samtools stats {input.bam} |grep -i 'error rate' | cut -f 3 > {output.stats}"    # extract error rates from samtools stats output and write to txt files
 
 
-rule collate_error_rates:    # collate error rates from all samples and reference genomes
+# Collate error rates from all samples and reference genomes
+rule collate_error_rates:    
     input:
         expand('samtools/{sample}.{ref}.txt', sample=NAMES, ref=REF)
     output:
@@ -104,7 +100,8 @@ rule collate_error_rates:    # collate error rates from all samples and referenc
                     out.write(f"{sample},{ref},{error}")    # write error rates to csv file [sample, reference genome, error rate]
 
 
-rule minimum_error_rates:    # get minimum error rate for each sample
+# Get the minimum error rate for each sample
+rule minimum_error_rates:
     input:
         "samtools/error_rates.csv"
     output:
@@ -114,7 +111,8 @@ rule minimum_error_rates:    # get minimum error rate for each sample
         "scripts/error_rate.py"                                                                                              
 
 
-rule consensus:    # generate consensus sequences
+# Generate the consensus sequences (draft assemblies)
+rule consensus:
     input:
         bam = "samtools/{sample}.{ref}.bam"
     output:
@@ -125,6 +123,7 @@ rule consensus:    # generate consensus sequences
         "samtools consensus -m simple -d20 {input.bam} > {output.fasta}"
 
 
+# Polish the consensus sequences with medaka
 rule medaka:
     input:
         fastq = "fastp/{sample}_filt.fastq.gz",
@@ -139,6 +138,7 @@ rule medaka:
         "medaka_consensus -r N -i {input.fastq} -d {input.fasta} -o {output.fasta_medaka} -m {params.model}"
 
 
+# Do variant calling
 rule freebayes:
     input:
         bam = "samtools/{sample}.{ref}.bam",
@@ -151,9 +151,11 @@ rule freebayes:
         "freebayes -f {input.ref} {input.bam} > {output.vcf}"
 
 
+# Copy all files relevant to the clinic to the output folder
 rule copy_files:
     input:
         "samtools/minimum_error_rates.csv",
+        #"output/vcf_modifications_done.txt",  
         expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF)
     output:
         "output/copy_files_done.txt"
@@ -161,6 +163,7 @@ rule copy_files:
         "scripts/copy_files.py"
 
 
+# Modify the vcf files and perform calculations 
 rule vcf_modification:
     input:
         "samtools/minimum_error_rates.csv",
@@ -171,6 +174,7 @@ rule vcf_modification:
         "scripts/vcf_modification.py"
 
 
+# Generate a quality control file with check of negative control and genome coverage
 rule qc:
     input:
         "output/copy_files_done.txt",
