@@ -36,7 +36,9 @@ rule all:    # specify the final output files
         #expand("consensus/medaka/variants/{sample}.{ref}", sample=NAMES, ref=REF), ##COMMENT OUT IF NOT WORKING
         expand("freebayes/{sample}.{ref}.vcf", sample=NAMES, ref=REF),    # variant calling
         "output/copy_files_done.txt",
-        "output/qc.csv"    # read counts
+        "output/vcf_modifications_done.txt",
+        "output/qc.csv",    # read counts
+        #expand("freebayes/{sample}.{ref}_edit.vcf", sample=NAMES, ref=REF)
 
 
 rule fastp:    # filter reads
@@ -136,6 +138,7 @@ rule medaka:
     shell:
         "medaka_consensus -r N -i {input.fastq} -d {input.fasta} -o {output.fasta_medaka} -m {params.model}"
 
+
 rule freebayes:
     input:
         bam = "samtools/{sample}.{ref}.bam",
@@ -147,6 +150,7 @@ rule freebayes:
     shell:  
         "freebayes -f {input.ref} {input.bam} > {output.vcf}"
 
+
 rule copy_files:
     input:
         "samtools/minimum_error_rates.csv",
@@ -156,16 +160,16 @@ rule copy_files:
     script:
         "scripts/copy_files.py"
 
-'''
-rule vcf_manipulation:
+
+rule vcf_modification:
     input:
-        "samtolls/minimum_error_rates.csv",
+        "samtools/minimum_error_rates.csv",
         expand("freebayes/{sample}.{ref}.vcf", sample=NAMES, ref=REF)
     output:
-        vcf_out = "freebayes/{sample}.{ref}_edit.vcf"
+        "output/vcf_modifications_done.txt"   
     script:
         "scripts/vcf_pandas.py"
-'''
+
 
 rule qc:
     input:

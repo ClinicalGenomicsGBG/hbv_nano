@@ -42,12 +42,14 @@ for _, row in df_files.iterrows():
         df[f'freq_{i+1:02}'] = (ao_values / (ao_values + df['RO'])).round(3)
 
     vcf_metadata = ''.join([line for line in vcf_in if line.startswith('##')])
-    vcf_data = df.to_csv(sep='\t', index=False, header=False)
+    vcf_data = df.to_csv(sep='\t', index=False)
     output = vcf_metadata + vcf_data
 
-    #print(vcf_data)
     # Write the DataFrame to the file
     with open(vcf_out_path, 'w') as f:
         f.write(output)
+        with open('output/vcf_modifications_done.txt', 'w') as f:
+            f.write('Modifications of vcf files done!')
+
 
 #print(df.filter(like='freq').iloc[1:11])

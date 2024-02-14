@@ -25,10 +25,10 @@ def copy_files():
                     out_fa.write(line)
         
         # copy variant files to output folder
-        variant_in = f'consensus/medaka/variants/{read_id}.{ref}/medaka.vcf'
-        variant_out = f'output/{read_id}.{ref}_medaka.vcf'
+        #variant_in = f'consensus/medaka/variants/{read_id}.{ref}/medaka.vcf'
+        #variant_out = f'output/{read_id}.{ref}_medaka.vcf'
 
-        shutil.copy(variant_in, variant_out)
+        #shutil.copy(variant_in, variant_out)
 
     with open('output/copy_files_done.txt', 'w') as f:
         f.write('file copying done')
