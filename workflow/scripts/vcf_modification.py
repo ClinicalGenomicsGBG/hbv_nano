@@ -132,10 +132,10 @@ for _, row in df_files.iterrows():
  
     table = CodonTable.unambiguous_dna_by_name["Standard"]
     amino_acid_codes = {
-        'A': 'Alanine', 'R': 'Arginine', 'N': 'Asparagine', 'D': 'Aspartic acid', 'C': 'Cysteine',
-        'E': 'Glutamic acid', 'Q': 'Glutamine', 'G': 'Glycine', 'H': 'Histidine', 'I': 'Isoleucine',
-        'L': 'Leucine', 'K': 'Lysine', 'M': 'Methionine', 'F': 'Phenylalanine', 'P': 'Proline',
-        'S': 'Serine', 'T': 'Threonine', 'W': 'Tryptophan', 'Y': 'Tyrosine', 'V': 'Valine',
+        'A': 'A - Alanine', 'R': 'R - Arginine', 'N': 'N - Asparagine', 'D': 'D - Aspartic acid', 'C': 'C - Cysteine',
+        'E': 'E - Glutamic acid', 'Q': 'Q - Glutamine', 'G': 'G - Glycine', 'H': 'H - Histidine', 'I': 'I - Isoleucine',
+        'L': 'L - Leucine', 'K': 'K - Lysine', 'M': 'M - Methionine', 'F': 'F - Phenylalanine', 'P': 'P - Proline',
+        'S': 'S - Serine', 'T': 'T - Threonine', 'W': 'W - Tryptophan', 'Y': 'Y - Tyrosine', 'V': 'V - Valine',
         '*': 'Stop'
     }
     
