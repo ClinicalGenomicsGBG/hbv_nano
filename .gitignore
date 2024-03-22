@@ -12,6 +12,7 @@ error_rates.csv
 fastp.json
 reference_genomes/*.fai
 reference_genomes/*.mmi
+variant_calling*
 
 # images
 images/

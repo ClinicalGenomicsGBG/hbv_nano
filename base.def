@@ -1,0 +1,8 @@
+Bootstrap: Docker
+From: ubuntu:20.04
+
+%post
+    apt-get update && apt-get upgrade -y
+    apt-get install -y python3-pip
+    pip install snakemake
+    pip install pandas
