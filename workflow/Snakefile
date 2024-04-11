@@ -27,6 +27,10 @@ rule all:    # specify the final output files
         expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # consensus sequences
         expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF),    # medaka consensus sequences
         expand("freebayes/{sample}.{ref}.vcf", sample=NAMES, ref=REF),    # variant calling
+        #expand("samtools/{sample}.{ref}.v.txt", sample=NAMES, ref=REF),    # error rates
+        #expand("samtools/{sample}.{ref}.rt.txt", sample=NAMES, ref=REF),    # rt reads
+        "samtools/view_stats.csv",
+        "samtools/view_stats_rt.csv",
         "output/copy_files_done.txt",
         "output/vcf_modifications_done.txt",
         "output/qc.csv",    # quality control file
@@ -77,12 +81,73 @@ rule samtools_stats:
     input:
         bam = "samtools/{sample}.{ref}.bam"    # all bam files
     output:
-        stats = "samtools/{sample}.{ref}.txt"  # output the error rate for each sample and reference genome
+        stats = temp("samtools/{sample}.{ref}.txt")  # output the error rate for each sample and reference genome
     singularity:
         config["samtools"]
     shell:
         "samtools stats {input.bam} |grep -i 'error rate' | cut -f 3 > {output.stats}"    # extract error rates from samtools stats output and write to txt files
 
+###UNDER_DEVELOPMENT
+# Index the bam files
+rule samtools_index:
+    input:
+        bam = "samtools/{sample}.{ref}.bam"
+    output:
+        bai = temp("samtools/{sample}.{ref}.bam.bai")
+    singularity:
+        config["samtools"]
+    shell:
+        "samtools index {input.bam} {output.bai}"
+
+
+# Count the total mapped reads and the mapped reads of the RT region
+rule samtools_view:
+    input:
+        bam = "samtools/{sample}.{ref}.bam",
+        bai = "samtools/{sample}.{ref}.bam.bai"
+    output:
+        stats = temp("samtools/{sample}.{ref}.v.txt"),
+        mapped_reads = temp("samtools/{sample}.{ref}.rt.txt")
+    singularity:
+        config["samtools"]
+    shell:
+        """
+        samtools view -F 260 {input.bam} | awk 'length($10) >= 400' | wc -l > {output.stats}   
+        samtools view -F 260 {input.bam} {wildcards.ref}:130-1161 | awk 'length($10) >= 400' | wc -l > {output.mapped_reads}
+        """
+        #"samtools view -c -F 260 {input.bam} > {output.stats}"    # number of mapped reads
+        #"samtools view -F 260 {input.bam} {wildcards.ref}:130-1161 | awk 'length($10) >= 400' | wc -l > {output.stats}"        
+        
+
+# Collate the total mapped reads from all samples and reference genomes
+rule collate_view_stats:
+    input:
+        expand('samtools/{sample}.{ref}.v.txt', sample=NAMES, ref=REF)
+    output:
+        "samtools/view_stats.csv"    # all view stats
+    run:
+        with open(output[0], 'w') as out:
+            for path in input:
+                sample = path.split('.')[0].split('/')[1]
+                ref = path.split('.')[1]
+
+                for view_stat in open(path):
+                    out.write(f"{sample},{ref},{view_stat}")    # write view stats to csv file [sample, reference genome, view stat]
+#new not tested
+rule collate_rt_stats:
+    input:
+        expand('samtools/{sample}.{ref}.rt.txt', sample=NAMES, ref=REF)
+    output:
+        "samtools/view_stats_rt.csv"    # all view stats
+    run:
+        with open(output[0], 'w') as out:
+            for path in input:
+                sample = path.split('.')[0].split('/')[1]
+                ref = path.split('.')[1]
+
+                for view_stat in open(path):
+                    out.write(f"{sample},{ref},{view_stat}")    # write view stats to csv file [sample, reference genome, view stat]                    
+###UNDER_DEVELOPMENT
 
 # Collate error rates from all samples and reference genomes
 rule collate_error_rates:    

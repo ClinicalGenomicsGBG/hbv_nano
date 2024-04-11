@@ -159,14 +159,29 @@ for _, row in df_files.iterrows():
     
     new_df = new_df.replace('None', '__', regex = True)
     new_df.columns = new_df.columns.str.replace('aa_', '')    # Remove 'aa_' from the column names
-    positions = [(181, 183), (187, 189), (202, 204), (367, 369), (634, 636), 
-                (646, 648), (667, 669), (670, 672), (733, 735), (739, 741), 
-                (835, 837), (877, 879)]
+    positions = [(367, 369), (634, 636), (646, 648), (667, 669), (670, 672),
+                (733, 735), (739, 741), (835, 837), (877, 879)]
     
     new_df['Known resistance position'] = ''
+    
+
+    new_df.insert(0, 'aa RT', ((new_df.index - 127) / 3).astype(int))    # Column with AA positions in RT region
+    
 
     for start, end in positions:
         new_df.loc[start:end, 'Known resistance position'] = 'True'
+
+    # Change triplets of idetical values to one entry to simplify readability
+    def qual_simplify(value):
+        parts = [part.strip() for part in value.split(';')]
+        return parts [0] if len(set(parts)) == 1 else value
+    
+    new_df['QUAL'] = new_df['QUAL'].apply(qual_simplify)    # Change QUAL triplets to single value
+
+    freq_cols = [col for col in new_df.columns if 'freq' in col]    # Extract all freq columns
+
+    for col in freq_cols:   
+        new_df[col] = new_df[col].apply(qual_simplify)    # Change freq triplets to single value
 
     print(new_df.head())
 
