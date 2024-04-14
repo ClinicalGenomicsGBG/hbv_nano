@@ -183,21 +183,33 @@ for _, row in df_files.iterrows():
     for col in freq_cols:   
         new_df[col] = new_df[col].apply(qual_simplify)    # Change freq triplets to single value
 
+    
+    ## Filter the output file based on the QUAL values
+    new_df['qc_pass'] = ''
+
+    # Function to check the QUAL values
+    def qual_check(row):
+        qual_val = row['QUAL'].split(';')
+        qual_val = [float(x.strip()) for x in qual_val if x.strip() != '__']
+
+        if not qual_val or all(x <= 1 for x in qual_val):
+            return pd.Series(dtype='float64')
+
+        if all(x <= 30 for x in qual_val):
+            row['qc_pass'] = "False"
+
+        return row
+
+    new_df = new_df.apply(qual_check, axis=1).dropna(how='all')    # Filter using the qual_check function
+    
+    # Move qc_pass column to the end of the df
+    qc = new_df.pop('qc_pass')
+    new_df = pd.concat([new_df, qc], axis=1)
+        
     print(new_df.head())
 
     filename = f'variant_calling_{read_id}_{ref}.txt'
     new_df.to_csv(filename, sep='\t', index=True)
 
-#___LEGACY___#
-        
-    # Prepare data for output
-    vcf_metadata = ''.join([line for line in vcf_in if line.startswith('##')])    # Lines containing metadata
-    vcf_data = df.to_csv(sep='\t', index=False)    # Data lines
-    output = vcf_metadata + vcf_data
-    
-    # Write frequencies to output vcf files
-    with open(vcf_out_path, 'w') as f:
-        #f.write(output)    # this is the original
-        f.write(vcf_data)
-        with open('output/vcf_modifications_done.txt', 'w') as f:
-            f.write('Modifications of vcf files done!')
+    with open('output/vcf_modifications_done.txt', 'w') as f:
+        f.write('Modifications of vcf files done!')

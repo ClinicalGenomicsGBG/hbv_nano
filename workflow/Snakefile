@@ -115,9 +115,7 @@ rule samtools_view:
         samtools view -F 260 {input.bam} | awk 'length($10) >= 400' | wc -l > {output.stats}   
         samtools view -F 260 {input.bam} {wildcards.ref}:130-1161 | awk 'length($10) >= 400' | wc -l > {output.mapped_reads}
         """
-        #"samtools view -c -F 260 {input.bam} > {output.stats}"    # number of mapped reads
-        #"samtools view -F 260 {input.bam} {wildcards.ref}:130-1161 | awk 'length($10) >= 400' | wc -l > {output.stats}"        
-        
+
 
 # Collate the total mapped reads from all samples and reference genomes
 rule collate_view_stats:

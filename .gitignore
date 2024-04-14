@@ -24,5 +24,6 @@ logs/
 .snakemake/
 workflow/scripts/test.py
 workflow/scripts/vcf_treatment.py
+workflow/scripts/hbv_nano_qsub.sh
 .keras/
 .vscode/
