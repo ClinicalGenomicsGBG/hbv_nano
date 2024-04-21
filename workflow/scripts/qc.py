@@ -33,7 +33,7 @@ df_merged['qc_pass'] = df_merged['qc_pass_ctrl'] & df_merged['qc_pass_rt']    # 
                                                                                                                                                
 print(df_merged)
 
-# Output the results
+## Output the results
 # All results
 df_merged.to_csv('output/qc.csv', index=False)
 

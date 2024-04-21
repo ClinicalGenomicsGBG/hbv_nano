@@ -159,12 +159,12 @@ for _, row in df_files.iterrows():
     
     new_df = new_df.replace('None', '__', regex = True)
     new_df.columns = new_df.columns.str.replace('aa_', '')    # Remove 'aa_' from the column names
-    positions = [(367, 369), (634, 636), (646, 648), (667, 669), (670, 672),
-                (733, 735), (739, 741), (835, 837), (877, 879)]
+    positions = [(367, 369), (634, 636), (646, 648), (667, 669), (670, 672),    # Known resistance positions
+                (679,681), (733, 735), (739, 741), (835, 837), (877, 879)]
     
     new_df['Known resistance position'] = ''
     
-
+    pd.options.display.float_format = '{:.0f}'.format
     new_df.insert(0, 'aa RT', ((new_df.index - 127) / 3).astype(int))    # Column with AA positions in RT region
     
 
@@ -197,6 +197,9 @@ for _, row in df_files.iterrows():
 
         if all(x <= 30 for x in qual_val):
             row['qc_pass'] = "False"
+        
+        if all(x > 30 for x in qual_val):
+            row['qc_pass'] = "True"
 
         return row
 
@@ -205,11 +208,71 @@ for _, row in df_files.iterrows():
     # Move qc_pass column to the end of the df
     qc = new_df.pop('qc_pass')
     new_df = pd.concat([new_df, qc], axis=1)
+
+    # Find the resistance mutations of the RT region 
+    resistance_rows = pd.concat([new_df.loc[start:end] for start, end in positions])
+    relevant_columns = ['aa RT', 'REF'] + alt_columns
+
+    def amino_acid(row):
+        aa_rt = str(int(row['aa RT']))
+        for col in columns_to_modify:
+            value = row[col]
+            if pd.notna(value):
+                row[col] = aa_rt + value[0]
+        return row
+
+    columns_to_modify = ['REF'] + alt_columns
+    resistance_rows = resistance_rows.apply(amino_acid, axis=1)
+    resistance_rows = resistance_rows[relevant_columns]
+    print(resistance_rows, "resistance rows")
+    
+
+    # Amino acid changes and the drug resitance they cause
+    drugs = {
+        (("173L",), "Lamivudine"): "Compensatory mutation; Lamivudine, Zeffix",
+        (("180C",), ("180M",), "Lamivudine"): "Limited susceptibility; Lamivudine, Zeffix",
+        (("204I",), ("204S",), ("204V",), "Lamivudine"): "Resistant; Lamivudine, Zeffix",
+        (("181T",), ("181V",), "Lamivudine"): "Resistant; Lamivudine, Zeffix",
+        (("80V"), ("80I",), "Lamivudine"): "Compensatory mutation; Lamivudine, Zeffix",
+
+        (("181T",), ("181V",), "Adefovir"): "Resistant; Adefovir, Hepsera",      
+        (("236T",), "Adefovir"): "Resistant; Adefovir, Hepsera",
+
+        (("169T","204V"), ("184A","204V"), ("184G","204V"), ("184I","204V"), ("184S","204V"), ("202G","204V"), ("202I","204V"),("250V","204V"), "Entecavir"): "Resistant; Entecavir, Baraclude",
+        (("169T","204I"), ("184A","204I"), ("184G","204I"), ("184I","204I"), ("184S","204I"), ("202G","204I"), ("202I","204I"), ("250V","204I"), "Entecavir"): "Resistant; Entecavir, Baraclude",
+
+        (("204V",), ("204I",), "Entecavir"): "Partly resistant; Entecavir, Baraclude",
+        (("180C",), ("180M",), "Entecavir"): "Compensatory mutation; Entecavir, Baraclude",
         
-    print(new_df.head())
+        (("169T",), ("184A",), ("184G",), ("184I",), ("184S",), "Entecavir"): "Compensatory mutation; Entecavir, Baraclude",
+        (("202G",), ("202I",), "Entecavir"): "Compensatory mutation; Entecavir, Baraclude",
+        (("250V",), "Entecavir"): "Compensatory mutation; Entecavir, Baraclude",
+
+        (("204I",), ("204V",), "Telbivudine"): "Resistant; Telbivudine, Tyzeka, Sebivo",
+        (("80I",), ("80V",), "Telbivudin"): "Compensatory mutation; Telbivudine, Tyzeka, Sebivo",
+        (("181T",), ("181V",), "Telbivudine"): "Resistant; Telbivudine, Tyzeka, Sebivo",
+    }
+
+    for alt in alt_columns:
+        new_df = pd.concat([new_df, pd.DataFrame([{}], columns=new_df.columns)])
+        new_df = pd.concat([new_df, pd.DataFrame([{'aa RT': alt, 'REF': ''}], columns=new_df.columns)])
+        
+        # Check if the resistance mutations are present in the RT region
+        for conditions, message in drugs.items():
+            drug = conditions[-1]  # The drug name is always the last element
+            mutation_pairs = conditions[:-1]  # All elements except the last one are mutation pairs
+            present_mutations = [pair for pair in mutation_pairs if all(mutation in resistance_rows[alt].values for mutation in pair)]
+
+            # Check for mutations and add write to output 
+            if present_mutations:
+                present_mutations_str = '; '.join(' and '.join(pair) for pair in present_mutations)
+                data = pd.DataFrame([{'aa RT': present_mutations_str, 'REF': message}], columns=new_df.columns)
+                new_df = pd.concat([new_df, data])
+
+    ##########__________________
 
     filename = f'variant_calling_{read_id}_{ref}.txt'
     new_df.to_csv(filename, sep='\t', index=True)
 
     with open('output/vcf_modifications_done.txt', 'w') as f:
-        f.write('Modifications of vcf files done!')
+        f.write('Modifications of vcf files done!') 
