@@ -229,50 +229,66 @@ for _, row in df_files.iterrows():
 
     # Amino acid changes and the drug resitance they cause
     drugs = {
-        (("173L",), "Lamivudine"): "Compensatory mutation; Lamivudine, Zeffix",
-        (("180C",), ("180M",), "Lamivudine"): "Limited susceptibility; Lamivudine, Zeffix",
-        (("204I",), ("204S",), ("204V",), "Lamivudine"): "Resistant; Lamivudine, Zeffix",
-        (("181T",), ("181V",), "Lamivudine"): "Resistant; Lamivudine, Zeffix",
-        (("80V"), ("80I",), "Lamivudine"): "Compensatory mutation; Lamivudine, Zeffix",
+        (("173L",), "Lamivudine"): "Compensatory mutation; Lamivudine",
+        (("180C",), ("180M",), "Lamivudine"): "Limited susceptibility; Lamivudine",
+        (("204I",), ("204S",), ("204V",), "Lamivudine"): "Resistant; Lamivudine",
+        (("181T",), ("181V",), "Lamivudine"): "Resistant; Lamivudine",
+        (("80V"), ("80I",), "Lamivudine"): "Compensatory mutation; Lamivudine",
 
         (("181T",), ("181V",), "Adefovir"): "Resistant; Adefovir, Hepsera",      
         (("236T",), "Adefovir"): "Resistant; Adefovir, Hepsera",
 
-        (("169T","204V"), ("184A","204V"), ("184G","204V"), ("184I","204V"), ("184S","204V"), ("202G","204V"), ("202I","204V"),("250V","204V"), "Entecavir"): "Resistant; Entecavir, Baraclude",
-        (("169T","204I"), ("184A","204I"), ("184G","204I"), ("184I","204I"), ("184S","204I"), ("202G","204I"), ("202I","204I"), ("250V","204I"), "Entecavir"): "Resistant; Entecavir, Baraclude",
+        (("169T","204V"), ("184A","204V"), ("184G","204V"), ("184I","204V"), ("184S","204V"), ("202G","204V"), ("202I","204V"),("250V","204V"), "Entecavir"): "Resistant; Entecavir",
+        (("169T","204I"), ("184A","204I"), ("184G","204I"), ("184I","204I"), ("184S","204I"), ("202G","204I"), ("202I","204I"), ("250V","204I"), "Entecavir"): "Resistant; Entecavir",
 
-        (("204V",), ("204I",), "Entecavir"): "Partly resistant; Entecavir, Baraclude",
-        (("180C",), ("180M",), "Entecavir"): "Compensatory mutation; Entecavir, Baraclude",
+        (("204V",), ("204I",), "Entecavir"): "Partly resistant; Entecavir",
+        (("180C",), ("180M",), "Entecavir"): "Compensatory mutation; Entecavir",
         
-        (("169T",), ("184A",), ("184G",), ("184I",), ("184S",), "Entecavir"): "Compensatory mutation; Entecavir, Baraclude",
-        (("202G",), ("202I",), "Entecavir"): "Compensatory mutation; Entecavir, Baraclude",
-        (("250V",), "Entecavir"): "Compensatory mutation; Entecavir, Baraclude",
+        (("169T",), ("184A",), ("184G",), ("184I",), ("184S",), "Entecavir"): "Compensatory mutation; Entecavir",
+        (("202G",), ("202I",), "Entecavir"): "Compensatory mutation; Entecavir",
+        (("250V",), "Entecavir"): "Compensatory mutation; Entecavir",
 
-        (("204I",), ("204V",), "Telbivudine"): "Resistant; Telbivudine, Tyzeka, Sebivo",
-        (("80I",), ("80V",), "Telbivudin"): "Compensatory mutation; Telbivudine, Tyzeka, Sebivo",
-        (("181T",), ("181V",), "Telbivudine"): "Resistant; Telbivudine, Tyzeka, Sebivo",
+        (("204I",), ("204V",), "Telbivudine"): "Resistant; Telbivudine",
+        (("80I",), ("80V",), "Telbivudin"): "Compensatory mutation; Telbivudine",
+        (("181T",), ("181V",), "Telbivudine"): "Resistant; Telbivudine",
     }
+    
+    resistance_df = pd.DataFrame(columns=['Drug', 'Compensatory mutation', 'Limited susceptibility', 'Partly resistant', 'Resistant', 'alt'])
+    drug_list = ["Entecavir", "Lamivudine", "Telbivudine", "Adefovir", "Tenofovir"]
+    resistance_df['Drug'] = drug_list
 
     for alt in alt_columns:
-        new_df = pd.concat([new_df, pd.DataFrame([{}], columns=new_df.columns)])
-        new_df = pd.concat([new_df, pd.DataFrame([{'aa RT': alt, 'REF': ''}], columns=new_df.columns)])
-        
         # Check if the resistance mutations are present in the RT region
         for conditions, message in drugs.items():
-            drug = conditions[-1]  # The drug name is always the last element
-            mutation_pairs = conditions[:-1]  # All elements except the last one are mutation pairs
+            drug = conditions[-1]  # Get the drug name
+            mutation_pairs = conditions[:-1]  # Get the mutation pairs
             present_mutations = [pair for pair in mutation_pairs if all(mutation in resistance_rows[alt].values for mutation in pair)]
 
             # Check for mutations and add write to output 
-            if present_mutations:
-                present_mutations_str = '; '.join(' and '.join(pair) for pair in present_mutations)
+            if present_mutations: # if there are mutations for the alt
+
+                present_mutations_str = ''.join(' and '.join(pair) for pair in present_mutations)
+                category = message.split('; ')[0]
                 data = pd.DataFrame([{'aa RT': present_mutations_str, 'REF': message}], columns=new_df.columns)
-                new_df = pd.concat([new_df, data])
+ 
+                if pd.notna(resistance_df.loc[resistance_df['Drug'] == drug, category]).any():
+                    resistance_df.loc[resistance_df['Drug'] == drug, category] += ', ' + present_mutations_str
+                else:
+                    resistance_df.loc[resistance_df['Drug'] == drug, category] = present_mutations_str
+                resistance_df.loc[resistance_df['Drug'] == drug, 'alt'] = alt
 
-    ##########__________________
+    col_names = resistance_df.columns.tolist()
+    col_df = pd.DataFrame([col_names], columns=resistance_df.columns)
+    empty_row_df = pd.DataFrame([dict.fromkeys(col_df.columns)], columns=col_df.columns)
+    col_df = pd.concat([empty_row_df, col_df]).reset_index(drop=True)
+    
 
-    filename = f'variant_calling_{read_id}_{ref}.txt'
+    resistance_df = pd.concat([col_df, resistance_df]).reset_index(drop=True)
+
+    resistance_df.columns = new_df.columns[:len(resistance_df.columns)]
+    new_df = pd.concat([new_df, resistance_df], ignore_index=True)
+    filename = f'output/variant_calling_{read_id}_{ref}.txt'
     new_df.to_csv(filename, sep='\t', index=True)
 
     with open('output/vcf_modifications_done.txt', 'w') as f:
-        f.write('Modifications of vcf files done!') 
+        f.write('Modifications of vcf files done!')
