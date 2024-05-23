@@ -3,10 +3,14 @@
 import pandas as pd
 import glob
 import shutil
+import os
 
-sample_sheet = pd.read_csv('data/samplesheet.csv')
+sample_sheet = pd.read_csv('test_data/samplesheet.csv')
 
-#print(sample_sheet)
+outpath = "test_data/out_data"
+
+if not os.path.exists(outpath):
+    os.makedirs(outpath)
 
 def concatenate(sample_sheet, rootdir, outputdir):
     print("Concatenating files")    
@@ -19,4 +23,4 @@ def concatenate(sample_sheet, rootdir, outputdir):
                     shutil.copyfileobj(fd, wfd)
 
 
-concatenate(sample_sheet, "data/test_data", "data/out_data")
+concatenate(sample_sheet, "test_data", "test_data/out_data")

@@ -33,13 +33,15 @@ rule all:    # specify the final output files
         "samtools/view_stats_rt.csv",
         "output/copy_files_done.txt",
         "output/vcf_modifications_done.txt",
+        #"vcf_modifications.done",
         "output/qc.csv",    # quality control file
 
 
 # Preprocess the fastq files
 rule fastp:
     input:
-        fastq = "data/{sample}.fastq.gz"    # get all fastq files
+        fastq = config["fastq_folder"] + "/{sample}.fastq.gz"
+        #fastq = "data/{sample}.fastq.gz"    # get all fastq files
     output: 
         fastq = "fastp/{sample}_filt.fastq.gz",    # output filtered reads
         report = "fastp/report/{sample}_filt.html"    # output fastp report
@@ -217,8 +219,8 @@ rule freebayes:
 # Copy all files relevant to the clinic to the output folder
 rule copy_files:
     input:
-        "samtools/minimum_error_rates.csv",
-        #"output/vcf_modifications_done.txt",  
+        #"samtools/minimum_error_rates.csv",
+        "output/vcf_modifications_done.txt",  
         expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF)
     output:
         "output/copy_files_done.txt"
@@ -232,6 +234,7 @@ rule vcf_modification:
         "samtools/minimum_error_rates.csv",
         expand("freebayes/{sample}.{ref}.vcf", sample=NAMES, ref=REF)
     output:
+        #touch("vcf_modifications.done")
         "output/vcf_modifications_done.txt"   
     script:
         "scripts/vcf_modification.py"
@@ -240,6 +243,7 @@ rule vcf_modification:
 # Generate a quality control file with check of negative control and genome coverage
 rule qc:
     input:
+        #"vcf_modifications.done",
         "output/copy_files_done.txt",
         #expand("output/{sample}.{ref}_medaka.fa", sample=NAMES, ref=REF)
     output:

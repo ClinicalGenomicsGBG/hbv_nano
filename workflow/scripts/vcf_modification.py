@@ -15,7 +15,7 @@ for _, row in df_files.iterrows():
     ref = row['ref']
 
     vcf_in_path = f'freebayes/{read_id}.{ref}.vcf'
-    vcf_out_path = f'freebayes/{read_id}.{ref}_edit.vcf'
+    #vcf_out_path = f'freebayes/{read_id}.{ref}_edit.vcf'
 
     reference_genome = f'reference_genomes/{ref}.fa'
     
@@ -71,7 +71,6 @@ for _, row in df_files.iterrows():
 
                 
     new_df.index = df['POS']    # Only get the positions where there are alternative alleles
-    
     new_df.index.name = None
     
     out_df = ref_df    # Create output df starting with the reference df
@@ -224,7 +223,6 @@ for _, row in df_files.iterrows():
     columns_to_modify = ['REF'] + alt_columns
     resistance_rows = resistance_rows.apply(amino_acid, axis=1)
     resistance_rows = resistance_rows[relevant_columns]
-    print(resistance_rows, "resistance rows")
     
 
     # Amino acid changes and the drug resitance they cause
@@ -256,8 +254,14 @@ for _, row in df_files.iterrows():
     resistance_df = pd.DataFrame(columns=['Drug', 'Compensatory mutation', 'Limited susceptibility', 'Partly resistant', 'Resistant', 'alt'])
     drug_list = ["Entecavir", "Lamivudine", "Telbivudine", "Adefovir", "Tenofovir"]
     resistance_df['Drug'] = drug_list
+    
+    resistance_dfs = {} # Store AA changes for each ALT
+    all_dfs = [] # Store all dfs for each ALT
+    
 
     for alt in alt_columns:
+        resistance_dfs[alt] = resistance_df.copy()
+        
         # Check if the resistance mutations are present in the RT region
         for conditions, message in drugs.items():
             drug = conditions[-1]  # Get the drug name
@@ -270,25 +274,38 @@ for _, row in df_files.iterrows():
                 present_mutations_str = ''.join(' and '.join(pair) for pair in present_mutations)
                 category = message.split('; ')[0]
                 data = pd.DataFrame([{'aa RT': present_mutations_str, 'REF': message}], columns=new_df.columns)
- 
-                if pd.notna(resistance_df.loc[resistance_df['Drug'] == drug, category]).any():
-                    resistance_df.loc[resistance_df['Drug'] == drug, category] += ', ' + present_mutations_str
+
+                if pd.notna(resistance_dfs[alt].loc[resistance_dfs[alt]['Drug'] == drug, category]).any():
+                    resistance_dfs[alt].loc[resistance_dfs[alt]['Drug'] == drug, category] += f', {present_mutations_str} ({alt})'
+                    resistance_dfs[alt].loc[resistance_dfs[alt]['Drug'] == drug, 'alt'] = alt
                 else:
-                    resistance_df.loc[resistance_df['Drug'] == drug, category] = present_mutations_str
-                resistance_df.loc[resistance_df['Drug'] == drug, 'alt'] = alt
+                    resistance_dfs[alt].loc[resistance_dfs[alt]['Drug'] == drug, category] = f'{present_mutations_str} ({alt})'
+                    resistance_dfs[alt].loc[resistance_dfs[alt]['Drug'] == drug, 'alt'] = alt
 
-    col_names = resistance_df.columns.tolist()
-    col_df = pd.DataFrame([col_names], columns=resistance_df.columns)
-    empty_row_df = pd.DataFrame([dict.fromkeys(col_df.columns)], columns=col_df.columns)
-    col_df = pd.concat([empty_row_df, col_df]).reset_index(drop=True)
-    
+                resistance_df.loc[resistance_df['Drug'] == drug]
 
-    resistance_df = pd.concat([col_df, resistance_df]).reset_index(drop=True)
+        all_dfs.append(resistance_dfs[alt])
 
+    # Concatenate the drug resistance for each alt
+    #empty_row = pd.DataFrame([dict.fromkeys(all_dfs[0].columns)], columns=all_dfs[0].columns)
+    empty_row = pd.Series(dtype='object')
+    all_dfs = [pd.concat([df, empty_row], ignore_index=True) for df in all_dfs]
+    final_df = pd.concat(all_dfs, ignore_index=False)
+
+    # Create columns and headers for drug resistance mutations for output
+    col_df = pd.DataFrame(columns = resistance_df.columns)
+    col_df.loc[0] = resistance_df.columns
+    col_df = col_df.shift(1)
+
+
+    resistance_df = pd.concat([col_df, final_df], ignore_index=True)
     resistance_df.columns = new_df.columns[:len(resistance_df.columns)]
     new_df = pd.concat([new_df, resistance_df], ignore_index=True)
-    filename = f'output/variant_calling_{read_id}_{ref}.txt'
-    new_df.to_csv(filename, sep='\t', index=True)
+    
+    # Finalise and write output
+    filename = f'variant_calling_{read_id}_{ref}.txt'
+    with open(filename, 'w') as f:
+        new_df.to_csv(filename, sep='\t', index=True)
 
     with open('output/vcf_modifications_done.txt', 'w') as f:
         f.write('Modifications of vcf files done!')
