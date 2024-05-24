@@ -27,21 +27,17 @@ rule all:    # specify the final output files
         expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # consensus sequences
         expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF),    # medaka consensus sequences
         expand("freebayes/{sample}.{ref}.vcf", sample=NAMES, ref=REF),    # variant calling
-        #expand("samtools/{sample}.{ref}.v.txt", sample=NAMES, ref=REF),    # error rates
-        #expand("samtools/{sample}.{ref}.rt.txt", sample=NAMES, ref=REF),    # rt reads
-        "samtools/view_stats.csv",
-        "samtools/view_stats_rt.csv",
-        "output/copy_files_done.txt",
-        "output/vcf_modifications_done.txt",
-        #"vcf_modifications.done",
+        "samtools/view_stats.csv",    # total mapped reads
+        "samtools/view_stats_rt.csv",    # mapped reads of the RT region
+        "output/copy_files_done.txt",    # files copied to output folder
+        "output/vcf_modifications_done.txt",    # vcf files modified
         "output/qc.csv",    # quality control file
 
 
 # Preprocess the fastq files
 rule fastp:
     input:
-        fastq = config["fastq_folder"] + "/{sample}.fastq.gz"
-        #fastq = "data/{sample}.fastq.gz"    # get all fastq files
+        fastq = f'{config["fastq_folder"]}/{{sample}}.fastq.gz'    # get all fastq files
     output: 
         fastq = "fastp/{sample}_filt.fastq.gz",    # output filtered reads
         report = "fastp/report/{sample}_filt.html"    # output fastp report
@@ -89,7 +85,7 @@ rule samtools_stats:
     shell:
         "samtools stats {input.bam} |grep -i 'error rate' | cut -f 3 > {output.stats}"    # extract error rates from samtools stats output and write to txt files
 
-###UNDER_DEVELOPMENT
+
 # Index the bam files
 rule samtools_index:
     input:
@@ -133,7 +129,9 @@ rule collate_view_stats:
 
                 for view_stat in open(path):
                     out.write(f"{sample},{ref},{view_stat}")    # write view stats to csv file [sample, reference genome, view stat]
-#new not tested
+
+
+# Collate the mapped reads of the RT region from all samples and reference genomes
 rule collate_rt_stats:
     input:
         expand('samtools/{sample}.{ref}.rt.txt', sample=NAMES, ref=REF)
@@ -147,7 +145,7 @@ rule collate_rt_stats:
 
                 for view_stat in open(path):
                     out.write(f"{sample},{ref},{view_stat}")    # write view stats to csv file [sample, reference genome, view stat]                    
-###UNDER_DEVELOPMENT
+
 
 # Collate error rates from all samples and reference genomes
 rule collate_error_rates:    
@@ -234,8 +232,7 @@ rule vcf_modification:
         "samtools/minimum_error_rates.csv",
         expand("freebayes/{sample}.{ref}.vcf", sample=NAMES, ref=REF)
     output:
-        #touch("vcf_modifications.done")
-        "output/vcf_modifications_done.txt"   
+        "output/vcf_modifications_done.txt"
     script:
         "scripts/vcf_modification.py"
 
@@ -243,9 +240,7 @@ rule vcf_modification:
 # Generate a quality control file with check of negative control and genome coverage
 rule qc:
     input:
-        #"vcf_modifications.done",
         "output/copy_files_done.txt",
-        #expand("output/{sample}.{ref}_medaka.fa", sample=NAMES, ref=REF)
     output:
         "output/qc.csv"
     script:

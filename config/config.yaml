@@ -8,4 +8,3 @@ minimap2: "images/minimap2_2.26.img"
 samtools: "images/samtools_1.18.img"
 medaka: "images/medaka_1.11.3.img"
 freebayes: "images/freebayes_1.3.7.img"
-
