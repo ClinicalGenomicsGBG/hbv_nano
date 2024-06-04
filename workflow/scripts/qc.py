@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 
 import pandas as pd
+import yaml
+
+with open('config/config.yaml', 'r') as f:
+    config = yaml.safe_load(f)
+output = config['output']
 
 # Get the best matching samples
-df_error_rates = pd.read_csv('samtools/minimum_error_rates.csv')
+#df_error_rates = pd.read_csv('samtools/minimum_error_rates.csv')
+df_error_rates = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')
 df_error_rates = df_error_rates[['read_id','ref']]
 
 # Get the number of mapped reads for each sample
@@ -35,7 +41,8 @@ print(df_merged)
 
 ## Output the results
 # All results
-df_merged.to_csv('output/qc.csv', index=False)
+#df_merged.to_csv('output/qc.csv', index=False)
+df_merged.to_csv(f'{output}/qc.csv', index=False)
 
 # Results relevant to the clinic
 df_clinic = df_merged[['read_id','ref','mapped_reads','mapped_reads_rt','qc_pass']]

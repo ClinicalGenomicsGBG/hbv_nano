@@ -4,6 +4,7 @@
 
 #!/usr/bin/env python3
 
+#testing things
 
 import pandas as pd
 
@@ -20,9 +21,11 @@ REF = REFERENCE.ref    # extract reference genome names
 
 rule all:    # specify the final output files
     input:
-        expand("fastp/report/{sample}_filt.html", sample=NAMES),   # fastp report
-        expand("fastp/{sample}_filt.fastq.gz", sample=NAMES),    # filtered reads
-        "samtools/minimum_error_rates.csv",    # minimum error rates [bc**,ref_*,*.****]
+        expand(f'{config["output"]}/fastp/report/{{sample}}.html', sample=NAMES),    # fastp report
+        #expand("fastp/{sample}_filt.fastq.gz", sample=NAMES),    # filtered reads
+        expand(f'{config["output"]}/fastp/{{sample}}_filt.fastq.gz', sample=NAMES),    # filtered reads
+        #"output/samtools/minimum_error_rates.csv",    # minimum error rates [bc**,ref_*,*.****]
+        f'{config["output"]}/samtools/minimum_error_rates.csv',    # minimum error rates [bc**,ref_*,*.****]
         expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF),    # sorted bam files
         expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # consensus sequences
         expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF),    # medaka consensus sequences
@@ -39,12 +42,10 @@ rule fastp:
     input:
         fastq = f'{config["fastq_folder"]}/{{sample}}.fastq.gz'    # get all fastq files
     output: 
-        fastq = "fastp/{sample}_filt.fastq.gz",    # output filtered reads
-        report = "fastp/report/{sample}_filt.html"    # output fastp report
+        fastq = f'{config["output"]}/fastp/{{sample}}_filt.fastq.gz',    # output filtered reads
+        report = f'{config["output"]}/fastp/report/{{sample}}.html'
     singularity:
         config["fastp"]
-    log:
-        "logs/fastp/{sample}.log"
     shell:
         "fastp -i {input.fastq} -o {output.fastq} -h {output.report}"
 
@@ -53,7 +54,7 @@ rule fastp:
 rule minimap2:
     input:
         ref = "reference_genomes/{ref}.fa",    # all reference genomes
-        fastq = "fastp/{sample}_filt.fastq.gz"    # filtered reads
+        fastq = f'{config["output"]}/fastp/{{sample}}_filt.fastq.gz'    # filtered reads
     output:
         sam = "minimap2/{sample}.{ref}.sam"   # output sam files
     singularity:
@@ -152,7 +153,8 @@ rule collate_error_rates:
     input:
         expand('samtools/{sample}.{ref}.txt', sample=NAMES, ref=REF)
     output:
-        "samtools/error_rates.csv"    # all error rates
+        #"samtools/error_rates.csv"    # all error rates
+        f'{config["output"]}/samtools/error_rates.csv'
     run:
         with open(output[0], 'w') as out:
             for path in input:
@@ -166,10 +168,11 @@ rule collate_error_rates:
 # Get the minimum error rate for each sample
 rule minimum_error_rates:
     input:
-        "samtools/error_rates.csv"
+        #"samtools/error_rates.csv"
+        f'{config["output"]}/samtools/error_rates.csv'
     output:
-        "samtools/minimum_error_rates.csv",
-        #"samtools/minimum_error_rates_2.csv"
+        #"output/samtools/minimum_error_rates.csv"
+        f'{config["output"]}/samtools/minimum_error_rates.csv'
     script:
         "scripts/error_rate.py"                                                                                              
 
@@ -189,7 +192,7 @@ rule consensus:
 # Polish the consensus sequences with medaka
 rule medaka:
     input:
-        fastq = "fastp/{sample}_filt.fastq.gz",
+        fastq = f'{config["output"]}/fastp/{{sample}}_filt.fastq.gz',
         fasta = "consensus/{sample}.{ref}.fa"
     params:
         model = "r1041_e82_400bps_sup_g615"
@@ -217,7 +220,6 @@ rule freebayes:
 # Copy all files relevant to the clinic to the output folder
 rule copy_files:
     input:
-        #"samtools/minimum_error_rates.csv",
         "output/vcf_modifications_done.txt",  
         expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF)
     output:
@@ -229,7 +231,8 @@ rule copy_files:
 # Modify the vcf files and perform calculations 
 rule vcf_modification:
     input:
-        "samtools/minimum_error_rates.csv",
+        #"output/samtools/minimum_error_rates.csv",
+        f'{config["output"]}/samtools/minimum_error_rates.csv',
         expand("freebayes/{sample}.{ref}.vcf", sample=NAMES, ref=REF)
     output:
         "output/vcf_modifications_done.txt"

@@ -5,8 +5,14 @@ from Bio.Seq import Seq
 from Bio.SeqUtils import seq3
 from Bio.Data import CodonTable
 
+import yaml
 
-df_files = pd.read_csv('samtools/minimum_error_rates.csv')    # File containing read_id and ref
+with open('config/config.yaml', 'r') as f:
+    config = yaml.safe_load(f)
+output = config['output']
+
+#df_files = pd.read_csv('output/samtools/minimum_error_rates.csv')    # File containing read_id and ref
+df_files = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')    # File containing read_id and ref
 
 for _, row in df_files.iterrows():
     
