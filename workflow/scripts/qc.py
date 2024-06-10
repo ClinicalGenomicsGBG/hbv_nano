@@ -8,16 +8,15 @@ with open('config/config.yaml', 'r') as f:
 output = config['output']
 
 # Get the best matching samples
-#df_error_rates = pd.read_csv('samtools/minimum_error_rates.csv')
 df_error_rates = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')
 df_error_rates = df_error_rates[['read_id','ref']]
 
 # Get the number of mapped reads for each sample
-df_view_stats = pd.read_csv('samtools/view_stats.csv', header=None)
+df_view_stats = pd.read_csv(f'{output}/samtools/view_stats.csv', header=None)
 df_view_stats.columns = ['read_id', 'ref', 'mapped_reads']
 
 # Get the number of mapped reads in the rt region for each sample
-df_view_stats_rt = pd.read_csv('samtools/view_stats_rt.csv', header=None)
+df_view_stats_rt = pd.read_csv(f'{output}/samtools/view_stats_rt.csv', header=None)
 df_view_stats_rt.columns = ['read_id', 'ref', 'mapped_reads_rt']
 
 # Get the number of mapped reads for the best matching samples
@@ -41,7 +40,6 @@ print(df_merged)
 
 ## Output the results
 # All results
-#df_merged.to_csv('output/qc.csv', index=False)
 df_merged.to_csv(f'{output}/qc.csv', index=False)
 
 # Results relevant to the clinic

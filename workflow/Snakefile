@@ -1,10 +1,4 @@
-# Run in this env.: /medstore/Development/nanopore_HBV/daniel/micromamba/envs/snakemake_hbv
-# Dry run with: snakemake -np
-# Run with e.g.: snakemake -c4
-
 #!/usr/bin/env python3
-
-#testing things
 
 import pandas as pd
 
@@ -22,19 +16,17 @@ REF = REFERENCE.ref    # extract reference genome names
 rule all:    # specify the final output files
     input:
         expand(f'{config["output"]}/fastp/report/{{sample}}.html', sample=NAMES),    # fastp report
-        #expand("fastp/{sample}_filt.fastq.gz", sample=NAMES),    # filtered reads
         expand(f'{config["output"]}/fastp/{{sample}}_filt.fastq.gz', sample=NAMES),    # filtered reads
-        #"output/samtools/minimum_error_rates.csv",    # minimum error rates [bc**,ref_*,*.****]
         f'{config["output"]}/samtools/minimum_error_rates.csv',    # minimum error rates [bc**,ref_*,*.****]
-        expand("samtools/{sample}.{ref}.bam", sample=NAMES, ref=REF),    # sorted bam files
-        expand("consensus/{sample}.{ref}.fa", sample=NAMES, ref=REF),    # consensus sequences
-        expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF),    # medaka consensus sequences
-        expand("freebayes/{sample}.{ref}.vcf", sample=NAMES, ref=REF),    # variant calling
-        "samtools/view_stats.csv",    # total mapped reads
-        "samtools/view_stats_rt.csv",    # mapped reads of the RT region
-        "output/copy_files_done.txt",    # files copied to output folder
-        "output/vcf_modifications_done.txt",    # vcf files modified
-        "output/qc.csv",    # quality control file
+        expand(f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam', sample=NAMES, ref=REF),    # sorted bam files
+        expand(f'{config["output"]}/consensus/{{sample}}.{{ref}}.fa', sample=NAMES, ref=REF),    # consensus sequences
+        expand(f'{config["output"]}/consensus/medaka/{{sample}}.{{ref}}', sample=NAMES, ref=REF),    # medaka consensus sequences
+        expand(f'{config["output"]}/freebayes/{{sample}}.{{ref}}.vcf', sample=NAMES, ref=REF),    # variant calling
+        f'{config["output"]}/samtools/view_stats.csv',    # total mapped reads
+        f'{config["output"]}/samtools/view_stats_rt.csv',    # mapped reads of the RT region
+        f'{config["output"]}/copy_files_done.txt',   # files copied to output folder
+        f'{config["output"]}/vcf_modifications_done.txt',    # vcf files modified
+        f'{config["output"]}/qc.csv'    # quality control file
 
 
 # Preprocess the fastq files
@@ -68,7 +60,7 @@ rule samtools:
     input:
         sam = "minimap2/{sample}.{ref}.sam"    # all sam files
     output:
-        bam = "samtools/{sample}.{ref}.bam"    # sorted bam files
+        bam = f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam'
     singularity:
         config["samtools"]
     shell:
@@ -78,9 +70,9 @@ rule samtools:
 # Get the error rates for each sample and reference genome
 rule samtools_stats:
     input:
-        bam = "samtools/{sample}.{ref}.bam"    # all bam files
+        bam = f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam'
     output:
-        stats = temp("samtools/{sample}.{ref}.txt")  # output the error rate for each sample and reference genome
+        stats = temp(f'{config["output"]}/samtools/{{sample}}.{{ref}}.txt')
     singularity:
         config["samtools"]
     shell:
@@ -90,9 +82,9 @@ rule samtools_stats:
 # Index the bam files
 rule samtools_index:
     input:
-        bam = "samtools/{sample}.{ref}.bam"
+        bam = f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam'
     output:
-        bai = temp("samtools/{sample}.{ref}.bam.bai")
+        bai = temp(f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam.bai')
     singularity:
         config["samtools"]
     shell:
@@ -102,11 +94,11 @@ rule samtools_index:
 # Count the total mapped reads and the mapped reads of the RT region
 rule samtools_view:
     input:
-        bam = "samtools/{sample}.{ref}.bam",
-        bai = "samtools/{sample}.{ref}.bam.bai"
+        bam = f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam',
+        bai = f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam.bai'
     output:
-        stats = temp("samtools/{sample}.{ref}.v.txt"),
-        mapped_reads = temp("samtools/{sample}.{ref}.rt.txt")
+        stats = temp(f'{config["output"]}/samtools/{{sample}}.{{ref}}.v.txt'),
+        mapped_reads = temp(f'{config["output"]}/samtools/{{sample}}.{{ref}}.rt.txt')
     singularity:
         config["samtools"]
     shell:
@@ -119,13 +111,13 @@ rule samtools_view:
 # Collate the total mapped reads from all samples and reference genomes
 rule collate_view_stats:
     input:
-        expand('samtools/{sample}.{ref}.v.txt', sample=NAMES, ref=REF)
+        expand(f'{config["output"]}/samtools/{{sample}}.{{ref}}.v.txt', sample=NAMES, ref=REF)
     output:
-        "samtools/view_stats.csv"    # all view stats
+        f'{config["output"]}/samtools/view_stats.csv'
     run:
         with open(output[0], 'w') as out:
             for path in input:
-                sample = path.split('.')[0].split('/')[1]
+                sample = path.split('/')[2].split('.')[0]
                 ref = path.split('.')[1]
 
                 for view_stat in open(path):
@@ -135,13 +127,13 @@ rule collate_view_stats:
 # Collate the mapped reads of the RT region from all samples and reference genomes
 rule collate_rt_stats:
     input:
-        expand('samtools/{sample}.{ref}.rt.txt', sample=NAMES, ref=REF)
+        expand(f'{config["output"]}/samtools/{{sample}}.{{ref}}.rt.txt', sample=NAMES, ref=REF)
     output:
-        "samtools/view_stats_rt.csv"    # all view stats
+        f'{config["output"]}/samtools/view_stats_rt.csv'
     run:
         with open(output[0], 'w') as out:
             for path in input:
-                sample = path.split('.')[0].split('/')[1]
+                sample = path.split('/')[2].split('.')[0]
                 ref = path.split('.')[1]
 
                 for view_stat in open(path):
@@ -151,14 +143,13 @@ rule collate_rt_stats:
 # Collate error rates from all samples and reference genomes
 rule collate_error_rates:    
     input:
-        expand('samtools/{sample}.{ref}.txt', sample=NAMES, ref=REF)
+        expand(f'{config["output"]}/samtools/{{sample}}.{{ref}}.txt', sample=NAMES, ref=REF)
     output:
-        #"samtools/error_rates.csv"    # all error rates
         f'{config["output"]}/samtools/error_rates.csv'
     run:
         with open(output[0], 'w') as out:
             for path in input:
-                sample = path.split('.')[0].split('/')[1]
+                sample = path.split('/')[2].split('.')[0]
                 ref = path.split('.')[1]
 
                 for error in open(path):
@@ -168,10 +159,8 @@ rule collate_error_rates:
 # Get the minimum error rate for each sample
 rule minimum_error_rates:
     input:
-        #"samtools/error_rates.csv"
         f'{config["output"]}/samtools/error_rates.csv'
     output:
-        #"output/samtools/minimum_error_rates.csv"
         f'{config["output"]}/samtools/minimum_error_rates.csv'
     script:
         "scripts/error_rate.py"                                                                                              
@@ -180,9 +169,9 @@ rule minimum_error_rates:
 # Generate the consensus sequences (draft assemblies)
 rule consensus:
     input:
-        bam = "samtools/{sample}.{ref}.bam"
+        bam = f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam'
     output:
-        fasta = "consensus/{sample}.{ref}.fa"
+        fasta = f'{config["output"]}/consensus/{{sample}}.{{ref}}.fa'
     singularity:
         config["samtools"]
     shell:
@@ -193,11 +182,11 @@ rule consensus:
 rule medaka:
     input:
         fastq = f'{config["output"]}/fastp/{{sample}}_filt.fastq.gz',
-        fasta = "consensus/{sample}.{ref}.fa"
+        fasta = f'{config["output"]}/consensus/{{sample}}.{{ref}}.fa'
     params:
         model = "r1041_e82_400bps_sup_g615"
     output:
-        fasta_medaka = directory("consensus/medaka/{sample}.{ref}")
+        fasta_medaka = directory(f'{config["output"]}/consensus/medaka/{{sample}}.{{ref}}')
     singularity:
         config["medaka"]
     shell:
@@ -207,10 +196,10 @@ rule medaka:
 # Do variant calling
 rule freebayes:
     input:
-        bam = "samtools/{sample}.{ref}.bam",
+        bam = f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam',
         ref = "reference_genomes/{ref}.fa"
     output:
-        vcf = "freebayes/{sample}.{ref}.vcf"
+        vcf = f'{config["output"]}/freebayes/{{sample}}.{{ref}}.vcf'
     singularity:
         config["freebayes"]
     shell:  
@@ -221,9 +210,9 @@ rule freebayes:
 rule copy_files:
     input:
         "output/vcf_modifications_done.txt",  
-        expand("consensus/medaka/{sample}.{ref}", sample=NAMES, ref=REF)
+        expand(f'{config["output"]}/consensus/medaka/{{sample}}.{{ref}}', sample=NAMES, ref=REF)
     output:
-        "output/copy_files_done.txt"
+        f'{config["output"]}/copy_files_done.txt'
     script:
         "scripts/copy_files.py"
 
@@ -231,11 +220,10 @@ rule copy_files:
 # Modify the vcf files and perform calculations 
 rule vcf_modification:
     input:
-        #"output/samtools/minimum_error_rates.csv",
         f'{config["output"]}/samtools/minimum_error_rates.csv',
-        expand("freebayes/{sample}.{ref}.vcf", sample=NAMES, ref=REF)
+        expand(f'{config["output"]}/freebayes/{{sample}}.{{ref}}.vcf', sample=NAMES, ref=REF)
     output:
-        "output/vcf_modifications_done.txt"
+        f'{config["output"]}/vcf_modifications_done.txt'
     script:
         "scripts/vcf_modification.py"
 
@@ -243,8 +231,8 @@ rule vcf_modification:
 # Generate a quality control file with check of negative control and genome coverage
 rule qc:
     input:
-        "output/copy_files_done.txt",
+        f'{config["output"]}/copy_files_done.txt',
     output:
-        "output/qc.csv"
+        f'{config["output"]}/qc.csv'
     script:
         "scripts/qc.py"

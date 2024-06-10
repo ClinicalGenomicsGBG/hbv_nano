@@ -11,7 +11,6 @@ with open('config/config.yaml', 'r') as f:
     config = yaml.safe_load(f)
 output = config['output']
 
-#df_files = pd.read_csv('output/samtools/minimum_error_rates.csv')    # File containing read_id and ref
 df_files = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')    # File containing read_id and ref
 
 for _, row in df_files.iterrows():
@@ -20,8 +19,7 @@ for _, row in df_files.iterrows():
     read_id = row['read_id']
     ref = row['ref']
 
-    vcf_in_path = f'freebayes/{read_id}.{ref}.vcf'
-    #vcf_out_path = f'freebayes/{read_id}.{ref}_edit.vcf'
+    vcf_in_path = f'{output}/freebayes/{read_id}.{ref}.vcf'
 
     reference_genome = f'reference_genomes/{ref}.fa'
     
@@ -293,7 +291,6 @@ for _, row in df_files.iterrows():
         all_dfs.append(resistance_dfs[alt])
 
     # Concatenate the drug resistance for each alt
-    #empty_row = pd.DataFrame([dict.fromkeys(all_dfs[0].columns)], columns=all_dfs[0].columns)
     empty_row = pd.Series(dtype='object')
     all_dfs = [pd.concat([df, empty_row], ignore_index=True) for df in all_dfs]
     final_df = pd.concat(all_dfs, ignore_index=False)
@@ -309,9 +306,9 @@ for _, row in df_files.iterrows():
     new_df = pd.concat([new_df, resistance_df], ignore_index=True)
     
     # Finalise and write output
-    filename = f'variant_calling_{read_id}_{ref}.txt'
+    filename = f'{output}/variant_calling_{read_id}_{ref}.txt'
     with open(filename, 'w') as f:
         new_df.to_csv(filename, sep='\t', index=True)
 
-    with open('output/vcf_modifications_done.txt', 'w') as f:
+    with open(f'{output}/vcf_modifications_done.txt', 'w') as f:
         f.write('Modifications of vcf files done!')

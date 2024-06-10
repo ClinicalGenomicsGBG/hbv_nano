@@ -8,9 +8,7 @@ with open('config/config.yaml', 'r') as f:
 output = config['output']
 
 # Calculate the minimum error rate for each read_id
-#input_file = "samtools/error_rates.csv"
 input_file = f'{output}/samtools/error_rates.csv'
-#output_file = "output/samtools/minimum_error_rates.csv"
 output_file = f'{output}/samtools/minimum_error_rates.csv'
 
 df = pd.read_csv(input_file, header=None)    # import error rates

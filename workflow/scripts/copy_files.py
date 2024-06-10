@@ -12,15 +12,14 @@ output = config['output']
 
 # Copy all files relevant for the clinic to the output folder
 def copy_files():
-    #df = pd.read_csv('samtools/minimum_error_rates.csv')
     df = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')
     for _, row in df.iterrows():
         read_id = row['read_id']
         ref = row['ref']
 
-        consensus_in = f'consensus/medaka/{read_id}.{ref}/consensus.fasta'
-        consensus_out = f'output/{read_id}.{ref}_medaka.fa'
-        
+        consensus_in = f'{output}/consensus/medaka/{read_id}.{ref}/consensus.fasta'
+        consensus_out = f'{output}/{read_id}.{ref}_medaka.fa'
+
         if not os.path.exists('output'):
             os.makedirs('output')
 
@@ -37,7 +36,6 @@ def copy_files():
         #variant_out = f'output/{read_id}.{ref}.vcf'
         #shutil.copy(variant_in, variant_out)
 
-    #with open('output/copy_files_done.txt', 'w') as f:
     with open(f'{output}/copy_files_done.txt', 'w') as f:
         f.write('All files were copied to the output folder!')
 
