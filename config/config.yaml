@@ -1,6 +1,6 @@
 # Folder with input .fastq files.
 #fastq_folder: "data"
-fastq_folder: "data/testdata"
+fastq_folder: "data/hbv_val_04"
 
 # singularity images
 fastp: "images/fastp_0.23.4.img"

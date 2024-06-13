@@ -48,7 +48,8 @@ rule minimap2:
         ref = "reference_genomes/{ref}.fa",    # all reference genomes
         fastq = f'{config["output"]}/fastp/{{sample}}_filt.fastq.gz'    # filtered reads
     output:
-        sam = "minimap2/{sample}.{ref}.sam"   # output sam files
+        #sam = "minimap2/{sample}.{ref}.sam"   # output sam files
+        sam = temp(f'{config["output"]}/samtools/{{sample}}.{{ref}}.sam') # output sam files
     singularity:
         config["minimap2"]
     shell:
@@ -58,9 +59,10 @@ rule minimap2:
 # Convert the bam files to samfiles and sort
 rule samtools:
     input:
-        sam = "minimap2/{sample}.{ref}.sam"    # all sam files
+        #sam = "minimap2/{sample}.{ref}.sam"    # all sam files
+        sam = f'{config["output"]}/samtools/{{sample}}.{{ref}}.sam'    # all sam files
     output:
-        bam = f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam'
+        bam = temp(f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam')
     singularity:
         config["samtools"]
     shell:
