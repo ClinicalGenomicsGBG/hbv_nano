@@ -30,3 +30,4 @@ workflow/scripts/wrapper_test.py
 workflow/scripts/qsub.sh
 .keras/
 .vscode/
+run/*

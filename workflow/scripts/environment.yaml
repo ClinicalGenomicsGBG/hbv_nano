@@ -1,0 +1,8 @@
+name: snakemake_hbv_test
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - snakemake-minimal
+  - biopython
+  - pandas

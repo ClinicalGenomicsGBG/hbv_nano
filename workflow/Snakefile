@@ -178,11 +178,24 @@ rule consensus:
         "samtools consensus -m simple -d20 {input.bam} > {output.fasta}"
 
 
+# Fill empty consensus sequences with Ns to keep medaka fro  crashing
+rule fill_empty_consensus:
+    input:
+        fasta = f'{config["output"]}/consensus/{{sample}}.{{ref}}.fa'
+    output:
+        done = temp(touch(f'{config["output"]}/consensus/{{sample}}.{{ref}}.done'))
+    run:
+        if os.path.getsize(input.fasta) == 0:
+            with open(input.fasta, 'w') as f:
+                f.write(f'>{wildcards.ref}\n')
+                f.write('N' * 3200 + '\n')
+
 # Polish the consensus sequences with medaka
 rule medaka:
     input:
         fastq = f'{config["output"]}/fastp/{{sample}}_filt.fastq.gz',
-        fasta = f'{config["output"]}/consensus/{{sample}}.{{ref}}.fa'
+        fasta = f'{config["output"]}/consensus/{{sample}}.{{ref}}.fa',
+        done = f'{config["output"]}/consensus/{{sample}}.{{ref}}.done'
     params:
         model = "r1041_e82_400bps_sup_g615"
     output:
