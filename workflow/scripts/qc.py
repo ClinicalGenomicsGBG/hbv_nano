@@ -44,4 +44,4 @@ df_merged.to_csv(f'{output}/qc.csv', index=False)
 
 # Results relevant to the clinic
 df_clinic = df_merged[['read_id','ref','mapped_reads','mapped_reads_rt','qc_pass']]
-df_clinic.to_csv('output/qc_clinic.csv', index=False)
+df_clinic.to_csv(f'{output}/qc_clinic.csv', index=False)

@@ -20,8 +20,8 @@ def copy_files():
         consensus_in = f'{output}/consensus/medaka/{read_id}.{ref}/consensus.fasta'
         consensus_out = f'{output}/{read_id}.{ref}_medaka.fa'
 
-        if not os.path.exists('output'):
-            os.makedirs('output')
+        if not os.path.exists(f'{output}'):
+            os.makedirs(f'{output}')
 
         # Change headers of consensus files and write to output folder
         with open(consensus_in, 'r') as in_fasta, open(consensus_out, 'w') as out_fa:

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
 import pandas as pd
+import os
 
 global files
 
 configfile: "config/config.yaml"
+#configfile: "run/config.yaml"
 
 FILES = glob_wildcards(config["fastq_folder"] + "/{sample}.fastq.gz")    # get all fastq files
 NAMES = FILES.sample    # extract sample names
@@ -121,6 +123,8 @@ rule collate_view_stats:
             for path in input:
                 sample = path.split('/')[2].split('.')[0]
                 ref = path.split('.')[1]
+                #filename = os.path.basename(path)
+                #sample, ref, _ = filename.split('.')
 
                 for view_stat in open(path):
                     out.write(f"{sample},{ref},{view_stat}")    # write view stats to csv file [sample, reference genome, view stat]
@@ -137,6 +141,8 @@ rule collate_rt_stats:
             for path in input:
                 sample = path.split('/')[2].split('.')[0]
                 ref = path.split('.')[1]
+                #filename = os.path.basename(path)
+                #sample, ref, _ = filename.split('.')
 
                 for view_stat in open(path):
                     out.write(f"{sample},{ref},{view_stat}")    # write view stats to csv file [sample, reference genome, view stat]                    
@@ -153,6 +159,8 @@ rule collate_error_rates:
             for path in input:
                 sample = path.split('/')[2].split('.')[0]
                 ref = path.split('.')[1]
+                #filename = os.path.basename(path)
+                #sample, ref, _ = filename.split('.')
 
                 for error in open(path):
                     out.write(f"{sample},{ref},{error}")    # write error rates to csv file [sample, reference genome, error rate]
@@ -224,7 +232,8 @@ rule freebayes:
 # Copy all files relevant to the clinic to the output folder
 rule copy_files:
     input:
-        "output/vcf_modifications_done.txt",  
+        #"output/vcf_modifications_done.txt",
+        f'{config["output"]}/vcf_modifications_done.txt',
         expand(f'{config["output"]}/consensus/medaka/{{sample}}.{{ref}}', sample=NAMES, ref=REF)
     output:
         f'{config["output"]}/copy_files_done.txt'
