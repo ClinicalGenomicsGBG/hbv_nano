@@ -35,8 +35,18 @@ df_merged['mapped reads neg_ctrl_rt/mapped reads sample_rt'] = round(reads_neg_c
 df_merged['qc_pass_ctrl'] = (df_merged['mapped reads neg_ctrl/mapped reads sample'] <= 0.1) & (df_merged['mapped_reads'] >= 100)   # Sample should have at least 10 times more reads than neg_ctrl and at least 100 mapped reads
 df_merged['qc_pass_rt'] = (df_merged['mapped reads neg_ctrl_rt/mapped reads sample_rt'] <= 0.1) & (df_merged['mapped_reads_rt'] >= 100)    # Sample should have at least 10 times more reads than neg_ctrl and at least 100 reads mapped to the RT region 
 df_merged['qc_pass'] = df_merged['qc_pass_ctrl'] & df_merged['qc_pass_rt']    # True if sample passes both QC checks
-                                                                                                                                               
-print(df_merged)
+
+# Perform QC check of the negative control
+mapped_reads_tot = df_merged['mapped_reads'].sum()
+reads_neg_ctrl = df_merged.loc[df_merged['read_id'].str.contains('neg_ctrl'), 'mapped_reads'].values[0]
+neg_ctrl_ratio = round(reads_neg_ctrl / mapped_reads_tot, 3)
+
+if neg_ctrl_ratio > 0.1:
+    df_merged.loc[df_merged['read_id'].str.contains('neg_ctrl'), 'qc_pass'] = False
+    print(f'Warning! The negative control contains {neg_ctrl_ratio * 100}% of the reads')
+else:
+    df_merged.loc[df_merged['read_id'].str.contains('neg_ctrl'), 'qc_pass'] = True
+
 
 ## Output the results
 # All results
