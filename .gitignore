@@ -28,6 +28,7 @@ workflow/scripts/vcf_treatment.py
 workflow/scripts/hbv_nano_qsub.sh
 workflow/scripts/wrapper_test.py
 workflow/scripts/qsub.sh
+workflow/scripts/update_config.py
 .keras/
 .vscode/
 run/*

@@ -3,10 +3,14 @@
 import pandas as pd
 import yaml
 
-with open('config/config.yaml', 'r') as f:
-    config = yaml.safe_load(f)
-output = config['output']
+try:
+    output = snakemake.params.output
+except NameError:
+    with open('config/config.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+    output = config['output']
 
+#output = snakemake.params.output
 # Calculate the minimum error rate for each read_id
 input_file = f'{output}/samtools/error_rates.csv'
 output_file = f'{output}/samtools/minimum_error_rates.csv'

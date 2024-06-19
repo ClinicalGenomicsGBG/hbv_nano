@@ -5,9 +5,12 @@ import shutil
 import os
 import yaml
 
-with open('config/config.yaml', 'r') as f:
-    config = yaml.safe_load(f)
-output = config['output']
+try:
+    output = snakemake.params.output
+except NameError:
+    with open('config/config.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+    output = config['output']
 
 
 # Copy all files relevant for the clinic to the output folder

@@ -3,9 +3,12 @@
 import pandas as pd
 import yaml
 
-with open('config/config.yaml', 'r') as f:
-    config = yaml.safe_load(f)
-output = config['output']
+try:
+    output = snakemake.params.output
+except NameError:
+    with open('config/config.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+    output = config['output']
 
 # Get the best matching samples
 df_error_rates = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')
