@@ -1,7 +1,0 @@
-read_id,ref,mapped_reads,mapped_reads_rt,mapped reads neg_ctrl/mapped reads sample,mapped reads neg_ctrl_rt/mapped reads sample_rt,qc_pass_ctrl,qc_pass_rt,qc_pass
-KH21-4096_bc01,ref_a,0,0,inf,inf,False,False,False
-KH21-5490_bc02,ref_e,565,244,0.007,0.008,True,True,True
-KH21-5556_bc03,ref_d,1316,455,0.003,0.004,True,True,True
-KH22-355_bc04,ref_d,1125,530,0.004,0.004,True,True,True
-KH22-4053_bc05,ref_d,582,186,0.007,0.011,True,True,True
-neg_ctrl_bc06,ref_d,4,2,1.0,1.0,False,False,True

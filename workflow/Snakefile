@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import time
 global files
-
+#testing
 #configfile: "config/config.yaml"
 configfile: "run/config.yaml"
 
@@ -52,7 +52,6 @@ rule minimap2:
         ref = "reference_genomes/{ref}.fa",    # all reference genomes
         fastq = f'{config["output"]}/fastp/{{sample}}_filt.fastq.gz'    # filtered reads
     output:
-        #sam = "minimap2/{sample}.{ref}.sam"   # output sam files
         sam = temp(f'{config["output"]}/samtools/{{sample}}.{{ref}}.sam') # output sam files
     singularity:
         config["minimap2"]
@@ -63,7 +62,6 @@ rule minimap2:
 # Convert the bam files to samfiles and sort
 rule samtools:
     input:
-        #sam = "minimap2/{sample}.{ref}.sam"    # all sam files
         sam = f'{config["output"]}/samtools/{{sample}}.{{ref}}.sam'    # all sam files
     output:
         bam = temp(f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam')
@@ -123,10 +121,10 @@ rule collate_view_stats:
     run:
         with open(output[0], 'w') as out:
             for path in input:
-                sample = path.split('/')[2].split('.')[0]
-                ref = path.split('.')[1]
-                #filename = os.path.basename(path)
-                #sample, ref, _ = filename.split('.')
+                #sample = path.split('/')[2].split('.')[0]
+                #ref = path.split('.')[1]
+                filename = os.path.basename(path)
+                sample, ref, _ = filename.split('.', 2)
 
                 for view_stat in open(path):
                     out.write(f"{sample},{ref},{view_stat}")    # write view stats to csv file [sample, reference genome, view stat]
@@ -141,10 +139,10 @@ rule collate_rt_stats:
     run:
         with open(output[0], 'w') as out:
             for path in input:
-                sample = path.split('/')[2].split('.')[0]
-                ref = path.split('.')[1]
-                #filename = os.path.basename(path)
-                #sample, ref, _ = filename.split('.')
+                #sample = path.split('/')[2].split('.')[0]
+                #ref = path.split('.')[1]
+                filename = os.path.basename(path)
+                sample, ref, _ = filename.split('.', 2)
 
                 for view_stat in open(path):
                     out.write(f"{sample},{ref},{view_stat}")    # write view stats to csv file [sample, reference genome, view stat]                    
@@ -159,10 +157,10 @@ rule collate_error_rates:
     run:
         with open(output[0], 'w') as out:
             for path in input:
-                sample = path.split('/')[2].split('.')[0]
-                ref = path.split('.')[1]
-                #filename = os.path.basename(path)
-                #sample, ref, _ = filename.split('.')
+                #sample = path.split('/')[2].split('.')[0]
+                #ref = path.split('.')[1]
+                filename = os.path.basename(path)
+                sample, ref, _ = filename.split('.')
 
                 for error in open(path):
                     out.write(f"{sample},{ref},{error}")    # write error rates to csv file [sample, reference genome, error rate]

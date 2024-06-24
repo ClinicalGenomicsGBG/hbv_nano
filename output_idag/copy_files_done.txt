@@ -1,1 +1,0 @@
-All files were copied to the output folder!
