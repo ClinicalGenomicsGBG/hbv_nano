@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import pandas as pd
+import os
 from Bio.Seq import Seq
 from Bio.SeqUtils import seq3
 from Bio.Data import CodonTable
@@ -301,7 +302,9 @@ for _, row in df_files.iterrows():
     output_df = pd.concat([aa_data_df, empty_row_df, resistance_df], ignore_index=True)    # Final output df
     
     # Finalise and write output
-    filename = f'{output}/variant_calling_{read_id}_{ref}.txt'
+    os.makedirs(f'{output}/clinic', exist_ok=True)
+
+    filename = f'{output}/clinic/variant_calling_{read_id}_{ref}.txt'
     with open(filename, 'w') as f:
         output_df.to_csv(filename, sep='\t', index=True)
 

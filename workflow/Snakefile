@@ -2,7 +2,7 @@
 
 import pandas as pd
 import os
-
+import time
 global files
 
 #configfile: "config/config.yaml"
@@ -14,6 +14,8 @@ NAMES = FILES.sample    # extract sample names
 REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference genomes 
 REF = REFERENCE.ref    # extract reference genome names
 
+#now_time = time.strftime("%y%m%d-%H%M%S")
+#config["output"] = f'{now_time}_{config["output"]}'
 
 rule all:    # specify the final output files
     input:
@@ -190,7 +192,7 @@ rule consensus:
         "samtools consensus -m simple -d20 {input.bam} > {output.fasta}"
 
 
-# Fill empty consensus sequences with Ns to keep medaka fro  crashing
+# Fill empty consensus sequences with Ns to keep medaka from  crashing
 rule fill_empty_consensus:
     input:
         fasta = f'{config["output"]}/consensus/{{sample}}.{{ref}}.fa'

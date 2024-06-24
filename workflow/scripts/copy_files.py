@@ -21,10 +21,9 @@ def copy_files():
         ref = row['ref']
 
         consensus_in = f'{output}/consensus/medaka/{read_id}.{ref}/consensus.fasta'
-        consensus_out = f'{output}/{read_id}.{ref}_medaka.fa'
+        consensus_out = f'{output}/clinic/{read_id}.{ref}.fa'
 
-        if not os.path.exists(f'{output}'):
-            os.makedirs(f'{output}')
+        os.makedirs(f'{output}/clinic', exist_ok=True)
 
         # Change headers of consensus files and write to output folder
         with open(consensus_in, 'r') as in_fasta, open(consensus_out, 'w') as out_fa:
@@ -33,11 +32,6 @@ def copy_files():
                     out_fa.write(f'>{read_id}.{ref}\n')
                 else:
                     out_fa.write(line)
-        
-        # Copy variant files to output folder
-        #variant_in = f'freebayes/{read_id}.{ref}_edit.vcf'
-        #variant_out = f'output/{read_id}.{ref}.vcf'
-        #shutil.copy(variant_in, variant_out)
 
     with open(f'{output}/copy_files_done.txt', 'w') as f:
         f.write('All files were copied to the output folder!')
