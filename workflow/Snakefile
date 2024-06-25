@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import time
 global files
-#testing
+
 #configfile: "config/config.yaml"
 configfile: "run/config.yaml"
 
@@ -121,8 +121,6 @@ rule collate_view_stats:
     run:
         with open(output[0], 'w') as out:
             for path in input:
-                #sample = path.split('/')[2].split('.')[0]
-                #ref = path.split('.')[1]
                 filename = os.path.basename(path)
                 sample, ref, _ = filename.split('.', 2)
 
@@ -139,8 +137,6 @@ rule collate_rt_stats:
     run:
         with open(output[0], 'w') as out:
             for path in input:
-                #sample = path.split('/')[2].split('.')[0]
-                #ref = path.split('.')[1]
                 filename = os.path.basename(path)
                 sample, ref, _ = filename.split('.', 2)
 
@@ -157,8 +153,6 @@ rule collate_error_rates:
     run:
         with open(output[0], 'w') as out:
             for path in input:
-                #sample = path.split('/')[2].split('.')[0]
-                #ref = path.split('.')[1]
                 filename = os.path.basename(path)
                 sample, ref, _ = filename.split('.')
 
@@ -234,7 +228,6 @@ rule freebayes:
 # Copy all files relevant to the clinic to the output folder
 rule copy_files:
     input:
-        #"output/vcf_modifications_done.txt",
         f'{config["output"]}/vcf_modifications_done.txt',
         expand(f'{config["output"]}/consensus/medaka/{{sample}}.{{ref}}', sample=NAMES, ref=REF)
     output:

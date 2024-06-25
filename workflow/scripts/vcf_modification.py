@@ -14,9 +14,9 @@ except NameError:
         config = yaml.safe_load(f)
     output = config['output']
 
-df_files = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')    # File containing read_id and ref
+min_err_rates_df = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')    # File containing read_id and ref
 
-for _, row in df_files.iterrows():
+for _, row in min_err_rates_df.iterrows():
     
     # Get relevant vcf files 
     read_id = row['read_id']
@@ -26,6 +26,7 @@ for _, row in df_files.iterrows():
 
     reference_genome = f'reference_genomes/{ref}.fa'
     
+    # Extract sequences from reference genomes
     with open(reference_genome, 'r') as f:
         lines = f.readlines()
 
@@ -40,44 +41,44 @@ for _, row in df_files.iterrows():
 
         f.seek(0)
         
-        df = pd.read_csv(f, comment='#', sep='\t', names=header)
+        vc_df = pd.read_csv(f, comment='#', sep='\t', names=header)    # Read in the vcf file using header as column names
 
     # Split the  column 'unknown' to extract genotype information
-    if 'unknown' in df.columns and not df['unknown'].empty:
-        split_df = df['unknown'].str.split(':', expand=True)                   
+    if 'unknown' in vc_df.columns and not vc_df['unknown'].empty:
+        split_df = vc_df['unknown'].str.split(':', expand=True)                   
         split_df.columns = ['GT', 'DP', 'AD', 'RO', 'QR', 'AO', 'QA', 'GL']      
     else:
         print(f'Column "unknown" does not exist/is empty in {vcf_in_path}! Skipping...')
         continue
 
-    df = pd.concat([df, split_df], axis=1)    # Concatenate the df with the split genotype columns
-    df['GT'] = ' ' + df['GT']    # Avoid date conversion if vcf opened in Excel
+    vc_df = pd.concat([vc_df, split_df], axis=1)    # Concatenate the df with the split genotype columns
+    vc_df['GT'] = ' ' + vc_df['GT']    # Avoid date conversion if vcf opened in Excel
     
     # Split the column 'ALT' to separate columns ALT_01, ALT_02, etc.
-    split_alt = df['ALT'].str.split(',', expand=True)
+    split_alt = vc_df['ALT'].str.split(',', expand=True)
     
     for i in range(len(split_alt.columns)):
         split_alt.rename(columns={i: f'ALT_{i+1:02}'}, inplace=True)
 
-    alt_index = df.columns.get_loc('ALT')
-    df = df.drop(columns=['ALT'])    
+    alt_index = vc_df.columns.get_loc('ALT')
+    vc_df = vc_df.drop(columns=['ALT'])    
     
     for i in reversed(range(len(split_alt.columns))):
-        df.insert(alt_index, f'ALT_{i+1:02}', split_alt[f'ALT_{i+1:02}'])
+        vc_df.insert(alt_index, f'ALT_{i+1:02}', split_alt[f'ALT_{i+1:02}'])
     
 
-    aa_data_df = df[[col for col in df.columns if 'ALT' in col or col == 'QUAL']].copy()    # Create a new df with only the ALT columns (AND QUAL!!!)
+    aa_data_df = vc_df[[col for col in vc_df.columns if 'ALT' in col or col == 'QUAL']].copy()    # Create a new df with only the ALT columns (AND QUAL!!!)
      
     # Calculate the frequencies of mutations for variant calling
-    split_ao = df['AO'].str.split(',', expand=True)
-    df['RO'] = pd.to_numeric(df['RO'])  
+    split_ao = vc_df['AO'].str.split(',', expand=True)
+    vc_df['RO'] = pd.to_numeric(vc_df['RO'])  
 
     for i in range(len(split_ao.columns)):
         ao_values = pd.to_numeric(split_ao[i])
-        aa_data_df.loc[:,f'freq_{i+1:02}'] = (ao_values / (ao_values + df['RO'])).round(3)    # Calculate the frequencies (AO/(AO+RO))
+        aa_data_df.loc[:,f'freq_{i+1:02}'] = (ao_values / (ao_values + vc_df['RO'])).round(3)    # Calculate the frequencies (AO/(AO+RO))
 
                 
-    aa_data_df.index = df['POS']    # Only get the positions where there are alternative alleles
+    aa_data_df.index = vc_df['POS']    # Only get the positions where there are alternative alleles
     aa_data_df.index.name = None
     
     out_df = ref_df    # Create output df starting with the reference df
@@ -293,7 +294,7 @@ for _, row in df_files.iterrows():
         all_dfs.append(resistance_dfs[alt])
 
     ## Concatenate the drug resistance for each alt and format for output
-    output_resistance_df = pd.concat([pd.concat([df, pd.DataFrame([{}])], ignore_index=True) for df in all_dfs], ignore_index=True)
+    output_resistance_df = pd.concat([pd.concat([vc_df, pd.DataFrame([{}])], ignore_index=True) for vc_df in all_dfs], ignore_index=True)
     header_resistance_df = pd.DataFrame(columns = resistance_df.columns)
     header_resistance_df.loc[0] = resistance_df.columns
     resistance_df = pd.concat([header_resistance_df, output_resistance_df], ignore_index=True)
