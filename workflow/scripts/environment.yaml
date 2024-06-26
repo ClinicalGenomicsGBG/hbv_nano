@@ -1,4 +1,4 @@
-name: snakemake_hbv_test
+name: hbv_nano
 channels:
   - bioconda
   - conda-forge

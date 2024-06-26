@@ -15,7 +15,7 @@ REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference 
 REF = REFERENCE.ref    # extract reference genome names
 
 #now_time = time.strftime("%y%m%d-%H%M%S")
-#config["output"] = f'{now_time}_{config["output"]}'
+config["output"] = f'{config["now_time"]}_{config["output"]}'
 
 rule all:    # specify the final output files
     input:
