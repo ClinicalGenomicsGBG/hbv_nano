@@ -6,7 +6,7 @@ fastp/
 minimap2/
 samtools/
 consensus/
-output*/
+*output*
 freebayes/
 error_rates.csv
 fastp.json

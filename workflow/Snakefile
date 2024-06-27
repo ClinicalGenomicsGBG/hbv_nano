@@ -5,8 +5,7 @@ import os
 import time
 global files
 
-#configfile: "config/config.yaml"
-configfile: "run/config.yaml"
+configfile: "config/config.yaml"
 
 FILES = glob_wildcards(config["fastq_folder"] + "/{sample}.fastq.gz")    # get all fastq files
 NAMES = FILES.sample    # extract sample names
@@ -14,8 +13,8 @@ NAMES = FILES.sample    # extract sample names
 REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference genomes 
 REF = REFERENCE.ref    # extract reference genome names
 
-#now_time = time.strftime("%y%m%d-%H%M%S")
-config["output"] = f'{config["now_time"]}_{config["output"]}'
+if config["now_time"]:
+    config["output"] = f'{config["now_time"]}_{config["output"]}'
 
 rule all:    # specify the final output files
     input:
