@@ -71,12 +71,14 @@ for _, row in min_err_rates_df.iterrows():
      
     # Calculate the frequencies of mutations for variant calling
     split_ao = vc_df['AO'].str.split(',', expand=True)
-    vc_df['RO'] = pd.to_numeric(vc_df['RO'])  
+    split_ao = split_ao.apply(pd.to_numeric).fillna(0)
+    ao_tot = split_ao.sum(axis=1)
+    
+    vc_df['RO'] = pd.to_numeric(vc_df['RO'])
 
     for i in range(len(split_ao.columns)):
-        ao_values = pd.to_numeric(split_ao[i])
-        aa_data_df.loc[:,f'freq_{i+1:02}'] = (ao_values / (ao_values + vc_df['RO'])).round(3)    # Calculate the frequencies (AO/(AO+RO))
-
+        ao_values = split_ao[i]
+        aa_data_df.loc[:,f'freq_{i+1:02}'] = (ao_values / (ao_tot + vc_df['RO'])).round(3)
                 
     aa_data_df.index = vc_df['POS']    # Only get the positions where there are alternative alleles
     aa_data_df.index.name = None
