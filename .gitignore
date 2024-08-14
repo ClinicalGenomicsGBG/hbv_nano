@@ -32,3 +32,5 @@ workflow/scripts/update_config.py
 .keras/
 .vscode/
 run/*
+test_data/
+config/wrapper_config.yaml

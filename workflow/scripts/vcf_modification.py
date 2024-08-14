@@ -16,6 +16,13 @@ except NameError:
 
 min_err_rates_df = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')    # File containing read_id and ref
 
+# Function to translate codons to amino acids
+def translate_codon(codon):
+    if codon is not None and codon in table.forward_table:
+        return f"{amino_acid_codes[table.forward_table[codon]]} ({codon})"
+    else:
+        return None
+
 for _, row in min_err_rates_df.iterrows():
     
     # Get relevant vcf files 
@@ -146,13 +153,6 @@ for _, row in min_err_rates_df.iterrows():
         'S': 'S - Serine', 'T': 'T - Threonine', 'W': 'W - Tryptophan', 'Y': 'Y - Tyrosine', 'V': 'V - Valine',
         '*': 'Stop'
     }
-    
-    # Function to translate codons to amino acids
-    def translate_codon(codon):
-        if codon is not None and codon in table.forward_table:
-            return f"{amino_acid_codes[table.forward_table[codon]]} ({codon})"
-        else:
-            return None
 
     # Apply the translation function to the codon columns
     for col in [c for c in aa_data_df.columns if 'aa_' in c and not 'freq' in c and c != 'aa_QUAL']:

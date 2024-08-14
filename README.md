@@ -81,6 +81,6 @@ The QC file has the name `qc_clinic.csv`. The file contains the following column
 
 `mapped_reads = the number of mapped reads for the sample`
 
-`mapped_reads = the number of mapped reads for the sample in the rt region`
+`mapped_reads_rt = the number of mapped reads for the sample in the rt region`
 
 `qc_pass = True or False. Whether the sample passed the QC or not.`
