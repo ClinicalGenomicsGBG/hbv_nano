@@ -1,8 +1,5 @@
 #!/bin/bash -l
 
-# Exit on any error
-set -e
-
 # Define path to images
 script_path=`dirname $(realpath $0)`
 root_image_path="${script_path}/../workflow/images"
