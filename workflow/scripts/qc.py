@@ -4,6 +4,7 @@ import pandas as pd
 import yaml
 import os
 
+# Get output folder using snakemake or, if running script independently, directly from config file
 try:
     output = snakemake.params.output
 except NameError:

@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import yaml
 
+# Get output folder using snakemake or, if running script independently, directly from config file
 try:
     output = snakemake.params.output
 except NameError:
@@ -12,8 +13,9 @@ except NameError:
     output = config['output']
 
 
-# Copy all files relevant for the clinic to the output folder
 def copy_files():
+    '''Copy all files relevant for the clinic to the output folder'''
+
     df = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')
     for _, row in df.iterrows():
         read_id = row['read_id']

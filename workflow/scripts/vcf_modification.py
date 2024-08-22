@@ -7,6 +7,7 @@ from Bio.SeqUtils import seq3
 from Bio.Data import CodonTable
 import yaml
 
+# Get output folder using snakemake or, if running script independently, directly from config file
 try:
     output = snakemake.params.output
 except NameError:
@@ -16,8 +17,9 @@ except NameError:
 
 min_err_rates_df = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')    # File containing read_id and ref
 
-# Function to translate codons to amino acids
 def translate_codon(codon):
+    '''Translate codons to amino acids'''
+
     if codon is not None and codon in table.forward_table:
         return f"{amino_acid_codes[table.forward_table[codon]]} ({codon})"
     else:
@@ -180,8 +182,9 @@ for _, row in min_err_rates_df.iterrows():
     for start, end in positions:
         aa_data_df.loc[start:end, 'Known resistance position'] = 'True'
 
-    # Change triplets of idetical values to one entry to simplify readability
     def qual_simplify(value):
+        '''Change triplets of idetical values to one entry to simplify readability'''
+
         parts = [part.strip() for part in value.split(';')]
         return parts [0] if len(set(parts)) == 1 else value
     
@@ -196,8 +199,9 @@ for _, row in min_err_rates_df.iterrows():
     ## Filter the output file based on the QUAL values
     aa_data_df['qc_pass'] = ''
 
-    # Function to check the QUAL values
     def qual_check(row):
+        '''Check the QUAL values'''
+
         qual_val = row['QUAL'].split(';')
         qual_val = [float(x.strip()) for x in qual_val if x.strip() != '__']
 
@@ -222,14 +226,17 @@ for _, row in min_err_rates_df.iterrows():
     relevant_columns = ['aa RT', 'REF'] + alt_columns
 
     def amino_acid(row):
-        aa_rt = str(int(row['aa RT']))
-        for col in columns_to_modify:
-            value = row[col]
-            if pd.notna(value):
-                row[col] = aa_rt + value[0]
+        '''Modify the amino acid columns to include the position in the RT region'''
+        
+        aa_pos_rt = str(int(row['aa RT']))    # Get the AA position in the RT region
+        
+        for col in aa_columns:    # Modify the REF column and the ALT column(s)
+            aa_name = row[col]
+            if pd.notna(aa_name):
+                row[col] = aa_pos_rt + aa_name[0]    # Add the RT position to the AA name
         return row
 
-    columns_to_modify = ['REF'] + alt_columns
+    aa_columns = ['REF'] + alt_columns
     resistance_rows = resistance_rows.apply(amino_acid, axis=1)
     resistance_rows = resistance_rows[relevant_columns]
     
