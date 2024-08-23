@@ -4,19 +4,20 @@ import pandas as pd
 import os
 import yaml
 
-# Get output folder using snakemake or, if running script independently, directly from config file
-try:
-    output = snakemake.params.output
-except NameError:
-    with open('config/config.yaml', 'r') as f:
-        config = yaml.safe_load(f)
-    output = config['output']
-
 
 def copy_files():
     '''Copy all files relevant for the clinic to the output folder'''
 
+    # Get output folder using snakemake or, if running script independently, directly from config file
+    try:
+        output = snakemake.params.output
+    except NameError:
+        with open('config/config.yaml', 'r') as f:
+            config = yaml.safe_load(f)
+        output = config['output']
+
     df = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')
+    
     for _, row in df.iterrows():
         read_id = row['read_id']
         ref = row['ref']
@@ -37,4 +38,5 @@ def copy_files():
     with open(f'{output}/copy_files_done.txt', 'w') as f:
         f.write('All files were copied to the output folder!')
 
-copy_files()                                                                       
+if __name__ == '__main__':
+    copy_files()
