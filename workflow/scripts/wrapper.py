@@ -12,18 +12,19 @@ with open('config/wrapper_config.yaml', 'r') as f:
 # Get paths from config file
 inpath = config['input_dir']    # Input path containing barcode folders with fastq files
 outpath = config['output_dir']    # Output path for concatenated fastq files
-sample_sheet = pd.read_csv(config['sample_sheet'])    # Sample sheet following Nanopore convention
+sample_sheet = pd.read_csv(config['sample_sheet'])    # Sample sheet following Nanopore naming convention
 
 # Create output directory if it does not exist (but is defined in the config file)
 if not os.path.exists(outpath):
     os.makedirs(outpath)
 
 # Check if there is a negative control in the sample sheet
-if not sample_sheet['type'].str.contains('neg', na=False).any():
+if not sample_sheet['type'].str.contains('neg', case=False, na=False).any():
     raise ValueError("No negative control could be found, please check input data. Aborting script.")
 
-# Function to concatenate fastq files for each barcode
+
 def concatenate(sample_sheet, inpath, outpath):
+    '''Concatenate fastq files for each barcode'''
     
     for _, row in sample_sheet.iterrows():
         barcode = row['barcode']
@@ -35,7 +36,7 @@ def concatenate(sample_sheet, inpath, outpath):
             print(f"No files found for alias {barcode}")
             continue
             
-        if 'neg' in sample_type:
+        if 'neg' in sample_type.lower():
             alias = f'{alias}_neg_ctrl'    # Change alias for negative control sample
 
         print(f'Concatenating all files for {barcode}.fastq.gz to {alias}.fastq.gz')
