@@ -7,13 +7,18 @@ from Bio.SeqUtils import seq3
 from Bio.Data import CodonTable
 import yaml
 
-# Get output folder using snakemake or, if running script independently, directly from config file
-try:
-    output = snakemake.params.output
-except NameError:
-    with open('config/config.yaml', 'r') as f:
-        config = yaml.safe_load(f)
-    output = config['output']
+def get_output():
+    '''Get output folder using snakemake or, if running script independently, directly from config file'''
+    
+    try:
+        output = snakemake.params.output
+    except NameError:
+        with open('config/config.yaml', 'r') as f:
+            config = yaml.safe_load(f)
+        output = config['output']
+    return output
+
+output = get_output()    # Get the output folder path
 
 min_err_rates_df = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')    # File containing read_id and ref
 
@@ -42,23 +47,23 @@ for _, row in min_err_rates_df.iterrows():
     bases = ''.join(line.strip() for line in lines if not line.startswith('>'))
     ref_df = pd.DataFrame(list(bases), columns=['REF'])
     
-    # Read in vcf files and prepare for modifications
+    # Read in vcf file and prepare for modifications
     with open(vcf_in_path, 'r') as f:
-        vcf_in = f.readlines()
-        header_line = next(line for line in vcf_in if line.startswith('#CHROM'))
-        header = header_line.strip().split('\t')
-
-        f.seek(0)
+        for line in f:
+            if line.startswith('#CHROM'):
+                header = line.strip().split('\t')
+                break
+        
+        f.seek(0)    # Go back to the beginning of the file
         
         vc_df = pd.read_csv(f, comment='#', sep='\t', names=header)    # Read in the vcf file using header as column names
-
+        
     # Split the  column 'unknown' to extract genotype information
     if 'unknown' in vc_df.columns and not vc_df['unknown'].empty:
         split_df = vc_df['unknown'].str.split(':', expand=True)                   
         split_df.columns = ['GT', 'DP', 'AD', 'RO', 'QR', 'AO', 'QA', 'GL']      
     else:
         print(f'Column "unknown" does not exist/is empty in {vcf_in_path}! Skipping...')
-        continue
 
     vc_df = pd.concat([vc_df, split_df], axis=1)    # Concatenate the df with the split genotype columns
     vc_df['GT'] = ' ' + vc_df['GT']    # Avoid date conversion if vcf opened in Excel
@@ -75,9 +80,8 @@ for _, row in min_err_rates_df.iterrows():
     for i in reversed(range(len(split_alt.columns))):
         vc_df.insert(alt_index, f'ALT_{i+1:02}', split_alt[f'ALT_{i+1:02}'])
     
+    aa_data_df = vc_df[[col for col in vc_df.columns if 'ALT' in col or col == 'QUAL']].copy()    # df containing the ALT columns and the QUAL column
 
-    aa_data_df = vc_df[[col for col in vc_df.columns if 'ALT' in col or col == 'QUAL']].copy()    # Create a new df with only the ALT columns (AND QUAL!!!)
-     
     # Calculate the frequencies of mutations for variant calling
     split_ao = vc_df['AO'].str.split(',', expand=True)
     split_ao = split_ao.apply(pd.to_numeric).fillna(0)
