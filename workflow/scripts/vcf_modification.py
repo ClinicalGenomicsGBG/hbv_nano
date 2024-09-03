@@ -49,10 +49,9 @@ for _, row in min_err_rates_df.iterrows():
     
     # Read in vcf file and prepare for modifications
     with open(vcf_in_path, 'r') as f:
-        for line in f:
-            if line.startswith('#CHROM'):
-                header = line.strip().split('\t')
-                break
+        vcf_in = f.readlines()
+        header_line = next(line for line in vcf_in if line.startswith('#CHROM'))
+        header = header_line.strip().split('\t')
         
         f.seek(0)    # Go back to the beginning of the file
         
@@ -64,6 +63,7 @@ for _, row in min_err_rates_df.iterrows():
         split_df.columns = ['GT', 'DP', 'AD', 'RO', 'QR', 'AO', 'QA', 'GL']      
     else:
         print(f'Column "unknown" does not exist/is empty in {vcf_in_path}! Skipping...')
+        continue
 
     vc_df = pd.concat([vc_df, split_df], axis=1)    # Concatenate the df with the split genotype columns
     vc_df['GT'] = ' ' + vc_df['GT']    # Avoid date conversion if vcf opened in Excel
