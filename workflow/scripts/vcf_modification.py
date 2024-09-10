@@ -6,6 +6,7 @@ from Bio.Seq import Seq
 from Bio.SeqUtils import seq3
 from Bio.Data import CodonTable
 import yaml
+import csv
 
 def get_output():
     '''Get output folder using snakemake or, if running script independently, directly from config file'''
@@ -20,8 +21,6 @@ def get_output():
 
 output = get_output()    # Get the output folder path
 
-min_err_rates_df = pd.read_csv(f'{output}/samtools/minimum_error_rates.csv')    # File containing read_id and ref
-
 def translate_codon(codon):
     '''Translate codons to amino acids'''
 
@@ -30,11 +29,20 @@ def translate_codon(codon):
     else:
         return None
 
-for _, row in min_err_rates_df.iterrows():
-    
-    # Get relevant vcf files 
-    read_id = row['read_id']
-    ref = row['ref']
+def get_samples(file_path):
+    '''Get the best matchings samples'''
+
+    sample_dict = {}
+    with open(file_path) as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row in reader:
+            key = row['read_id']
+            sample_dict[key] = row['ref']
+    return sample_dict
+
+min_err_rates = get_samples(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and ref
+
+for read_id, ref in min_err_rates.items():    
 
     vcf_in_path = f'{output}/freebayes/{read_id}.{ref}.vcf'
 
@@ -105,16 +113,21 @@ for _, row in min_err_rates_df.iterrows():
     out_df = ref_df.shift()    # Shift the reference dataframe to match the positions of the alternative alleles
     out_df['QUAL'] = None
 
+    #TESTING!!!
+
     for idx, row in aa_data_df.iterrows():    # Split the ALT columns into separate rows and put into the output df
         for col in [c for c in aa_data_df.columns if 'ALT' in c]:
             if row[col] is not None:
-                freq_col = col.replace('ALT', 'freq')
+                
+                freq_col = col.replace('ALT', 'freq')    # Add freq columns. E.g. ALT_01 -> freq_01...
+                
                 for i, char in enumerate(row[col]):
-                    out_df.loc[idx + i, col] = char
+                    out_df.loc[idx + i, col] = char    # Takes the alternative sequences from the columns, splits them and puts them into the output df row by row
+                    #print(f'idx: {idx}, i: {i}, col: {col}, char: {char}') #test
                     if freq_col in aa_data_df.columns:    # Check if the 'freq' column exists
-                        out_df.loc[idx + i, freq_col] = row[freq_col]
-                        if 'QUAL' in aa_data_df.columns:    # Check if the 'QUAL' column exists
-                            out_df.loc[idx + i, 'QUAL'] = row['QUAL']
+                        out_df.loc[idx + i, freq_col] = row[freq_col]    # Add the frequency values to out_df
+                    if 'QUAL' in aa_data_df.columns:    # Check if the 'QUAL' column exists
+                        out_df.loc[idx + i, 'QUAL'] = row['QUAL']    # Add the QUAL values to out_df
     
     # Extract the RT region
     start, end = 130, 1161    # Start and end of RT region
@@ -314,7 +327,7 @@ for _, row in min_err_rates_df.iterrows():
     resistance_df.columns = aa_data_df.columns[:len(resistance_df.columns)]
     empty_row_df = pd.DataFrame([{}], columns=aa_data_df.columns)
     output_df = pd.concat([aa_data_df, empty_row_df, resistance_df], ignore_index=True)    # Final output df
-    
+
     # Finalise and write output
     os.makedirs(f'{output}/clinic', exist_ok=True)
 
@@ -324,3 +337,4 @@ for _, row in min_err_rates_df.iterrows():
 
     with open(f'{output}/vcf_modifications_done.txt', 'w') as f:
         f.write('Modifications of vcf files done!')
+    
