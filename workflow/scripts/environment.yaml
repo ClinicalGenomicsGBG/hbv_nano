@@ -1,0 +1,8 @@
+name: hbv_nano
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - snakemake-minimal
+  - biopython
+  - pandas
