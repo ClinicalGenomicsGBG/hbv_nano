@@ -14,8 +14,7 @@ REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference 
 REF = REFERENCE.ref    # extract reference genome names
 
 if config["now_time"]:
-    config["output"] = f'{config["now_time"]}_{config["output"]}'
-
+    config["output"] = f'{config["output"]}/{config["now_time"]}_hbv_nano'
 rule all:    # specify the final output files
     input:
         expand(f'{config["output"]}/fastp/report/{{sample}}.html', sample=NAMES),    # fastp report

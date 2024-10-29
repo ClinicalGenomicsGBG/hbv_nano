@@ -3,6 +3,10 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - snakemake-minimal
-  - biopython
-  - pandas
+  - python=3.12
+  - snakemake-minimal=8.20.5
+  - pip=24.2
+  - pip:
+    - biopython==1.84
+    - pandas==2.2.3
+    - click==8.1.3

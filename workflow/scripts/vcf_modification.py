@@ -40,9 +40,30 @@ def get_samples(file_path):
             sample_dict[key] = row['ref']
     return sample_dict
 
-min_err_rates = get_samples(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and ref
+min_err_rates = get_samples(f'{output}/samtools/minimum_error_rates.csv')
+samples = get_samples(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and ref
 
-for read_id, ref in min_err_rates.items():    
+
+def get_references(reference_path):
+    '''Read all reference genome files in a directory and return a dictionary with ref values as keys and sequences as values.'''
+    reference_dict = {}
+    valid_files = {'ref_a.fa', 'ref_b.fa', 'ref_c.fa', 'ref_d.fa', 'ref_e.fa', 'ref_f.fa', 'ref_g.fa', 'ref_h.fa', 'ref_i.fa', 'ref_j.fa'}
+    for reference in os.listdir(reference_path):
+        if reference in valid_files:
+            reference_genome = os.path.join(reference_path, reference)
+            base_name, _ = os.path.splitext(reference)
+            with open(reference_genome, 'r') as f:
+                next(f)  # Skip the header line
+                sequence = ''.join(line.strip() for line in f)
+                reference_dict[base_name] = sequence
+    return reference_dict
+
+reference_genomes = get_references('reference_genomes')    # Read in reference genomes
+#####
+
+
+
+for read_id, ref in samples.items():    
 
     vcf_in_path = f'{output}/freebayes/{read_id}.{ref}.vcf'
 
@@ -54,6 +75,7 @@ for read_id, ref in min_err_rates.items():
 
     bases = ''.join(line.strip() for line in lines if not line.startswith('>'))
     ref_df = pd.DataFrame(list(bases), columns=['REF'])
+    
     
     # Read in vcf file and prepare for modifications
     with open(vcf_in_path, 'r') as f:
@@ -113,7 +135,6 @@ for read_id, ref in min_err_rates.items():
     out_df = ref_df.shift()    # Shift the reference dataframe to match the positions of the alternative alleles
     out_df['QUAL'] = None
 
-    #TESTING!!!
 
     for idx, row in aa_data_df.iterrows():    # Split the ALT columns into separate rows and put into the output df
         for col in [c for c in aa_data_df.columns if 'ALT' in c]:
