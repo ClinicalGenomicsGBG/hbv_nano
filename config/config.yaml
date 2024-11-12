@@ -1,5 +1,5 @@
 # Folder with input .fastq files.
-fastq_folder: "data/hbv_val_02"
+fastq_folder: "fastq_folder"
 
 # Output folder:
 output: "output"
