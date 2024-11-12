@@ -1,0 +1,36 @@
+# data folders
+data/
+
+# output files
+fastp/
+minimap2/
+samtools/
+consensus/
+*output*
+freebayes/
+error_rates.csv
+fastp.json
+reference_genomes/*.fai
+reference_genomes/*.mmi
+variant_calling*
+
+# images
+images/
+
+# log files
+logs/
+hbv_nano*
+
+# miscellaneous
+.snakemake/
+workflow/scripts/test.py
+workflow/scripts/vcf_treatment.py
+workflow/scripts/hbv_nano_qsub.sh
+workflow/scripts/wrapper_test.py
+workflow/scripts/qsub.sh
+workflow/scripts/update_config.py
+.keras/
+.vscode/
+run/*
+test_data/
+config/wrapper_config.yaml

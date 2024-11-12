@@ -1,0 +1,15 @@
+# Folder with input .fastq files.
+fastq_folder: "fastq_folder"
+
+# Output folder:
+output: "output"
+
+# Timestamp:
+now_time: ""
+
+# Apptainer images
+fastp: "images/fastp_0.23.4.img"
+freebayes: "images/freebayes_1.3.7.img"
+medaka: "images/medaka_1.12.0.img"
+minimap2: "images/minimap2_2.28.img"
+samtools: "images/samtools_1.20.img"
