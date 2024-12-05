@@ -227,7 +227,9 @@ rule freebayes:
 rule copy_files:
     input:
         f'{config["output"]}/vcf_modifications_done.txt',
-        expand(f'{config["output"]}/consensus/medaka/{{sample}}.{{ref}}', sample=NAMES, ref=REF)
+        expand(f'{config["output"]}/consensus/medaka/{{sample}}.{{ref}}', sample=NAMES, ref=REF),
+        expand(f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam', sample=NAMES, ref=REF),
+        expand(f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam.bai', sample=NAMES, ref=REF)
     output:
         f'{config["output"]}/copy_files_done.txt'
     params:
