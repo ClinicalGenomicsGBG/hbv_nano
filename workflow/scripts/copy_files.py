@@ -3,6 +3,7 @@
 import pandas as pd
 import os
 import yaml
+import shutil
 
 
 def copy_files():
@@ -25,6 +26,12 @@ def copy_files():
         consensus_in = f'{output}/consensus/medaka/{read_id}.{ref}/consensus.fasta'
         consensus_out = f'{output}/clinic/{read_id}.{ref}.fa'
 
+        bam_in = f'{output}/samtools/{read_id}.{ref}.bam'
+        bam_out = f'{output}/clinic/{read_id}.{ref}.bam'
+
+        bai_in = f'{output}/samtools/{read_id}.{ref}.bam.bai'
+        bai_out = f'{output}/clinic/{read_id}.{ref}.bam.bai'
+
         os.makedirs(f'{output}/clinic', exist_ok=True)
 
         # Change headers of consensus files and write to output folder
@@ -34,6 +41,10 @@ def copy_files():
                     out_fa.write(f'>{read_id}.{ref}\n')
                 else:
                     out_fa.write(line)
+
+        # Copy BAM and BAI files to the output folder
+        shutil.copy(bam_in, bam_out)
+        shutil.copy(bai_in, bai_out)
 
     with open(f'{output}/copy_files_done.txt', 'w') as f:
         f.write('All files were copied to the output folder!')
