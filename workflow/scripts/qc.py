@@ -71,15 +71,15 @@ def qc(df_merged):
 def output_results(df_merged, output):
     '''Output the results'''
 
-    # All results
-    df_merged.to_csv(f'{output}/qc.csv', index=False)
+    # Output full qc file
+    df_merged.to_csv(f'{output}/qc_full.csv', index=False)
 
-    # Results relevant to the clinic
+    # Output qc file with results relevant to the clinic
     df_clinic = df_merged[['read_id','ref','mapped_reads','mapped_reads_rt','qc_pass']]
 
     os.makedirs(f'{output}/clinic', exist_ok=True)
 
-    df_clinic.to_csv(f'{output}/clinic/qc.csv', index=False)
+    df_clinic.to_csv(f'{output}/qc.csv', index=False)
 
 def main():
     output = get_output()
