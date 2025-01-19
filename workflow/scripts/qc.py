@@ -37,6 +37,10 @@ def data_handling():
     df_merged = pd.merge(df_error_rates, df_view_stats, on=['read_id', 'ref'])
     df_merged = pd.merge(df_merged, df_view_stats_rt, on=['read_id', 'ref'])
 
+    # Genotyping
+    df_merged['ref'] = df_merged['ref'].str.replace('ref_','').str.upper()    
+    df_merged.rename(columns={'ref': 'genotype'}, inplace=True)
+
     # Get the number of mapped reads for the negative controls of the samples and the rt regions
     reads_neg_ctrl = df_merged.loc[df_merged['read_id'].str.contains('neg_ctrl'), 'mapped_reads'].values[0]
     reads_neg_ctrl_rt = df_merged.loc[df_merged['read_id'].str.contains('neg_ctrl'), 'mapped_reads_rt'].values[0]
@@ -75,7 +79,7 @@ def output_results(df_merged, output):
     df_merged.to_csv(f'{output}/qc_full.csv', index=False)
 
     # Output qc file with results relevant to the clinic
-    df_clinic = df_merged[['read_id','ref','mapped_reads','mapped_reads_rt','qc_pass']]
+    df_clinic = df_merged[['read_id','genotype','mapped_reads','mapped_reads_rt','qc_pass']]
     df_clinic.to_csv(f'{output}/qc.csv', index=False)
 
 def main():
