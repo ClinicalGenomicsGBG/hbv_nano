@@ -55,9 +55,9 @@ def qc(df_merged):
     '''Perform QC checks'''
 
     # Perform QC checks
-    df_merged['qc_pass_ctrl'] = (df_merged['mapped reads neg_ctrl/mapped reads sample'] <= 0.1) & (df_merged['mapped_reads'] >= 100)   # Sample should have at least 10 times more reads than neg_ctrl and at least 100 mapped reads
+    df_merged['qc_pass_gt'] = (df_merged['mapped reads neg_ctrl/mapped reads sample'] <= 0.1) & (df_merged['mapped_reads'] >= 100)   # Sample should have at least 10 times more reads than neg_ctrl and at least 100 mapped reads
     df_merged['qc_pass_rt'] = (df_merged['mapped reads neg_ctrl_rt/mapped reads sample_rt'] <= 0.1) & (df_merged['mapped_reads_rt'] >= 100)    # Sample should have at least 10 times more reads than neg_ctrl and at least 100 reads mapped to the RT region 
-    df_merged['qc_pass'] = df_merged['qc_pass_ctrl'] & df_merged['qc_pass_rt']    # True if sample passes both QC checks
+    df_merged['qc_pass'] = df_merged['qc_pass_gt'] & df_merged['qc_pass_rt']    # True if sample passes both QC checks
 
     # Perform QC check of the negative control
     mapped_reads_tot = df_merged['mapped_reads'].sum()
@@ -79,7 +79,7 @@ def output_results(df_merged, output):
     df_merged.to_csv(f'{output}/qc_full.csv', index=False)
 
     # Output qc file with results relevant to the clinic
-    df_clinic = df_merged[['read_id','genotype','mapped_reads','mapped_reads_rt','qc_pass']]
+    df_clinic = df_merged[['read_id','genotype','qc_pass_gt', 'mapped_reads','mapped_reads_rt','qc_pass_rt']]
     df_clinic.to_csv(f'{output}/qc.csv', index=False)
 
 def main():
