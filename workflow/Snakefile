@@ -15,6 +15,7 @@ REF = REFERENCE.ref    # extract reference genome names
 
 if config["now_time"]:
     config["output"] = f'{config["output"]}/{config["now_time"]}_hbv_nano'
+    
 rule all:    # specify the final output files
     input:
         expand(f'{config["output"]}/fastp/report/{{sample}}.html', sample=NAMES),    # fastp report
@@ -36,8 +37,8 @@ rule fastp:
     input:
         fastq = f'{config["fastq_folder"]}/{{sample}}.fastq.gz'    # get all fastq files
     output: 
-        fastq = f'{config["output"]}/fastp/{{sample}}_filt.fastq.gz',    # output filtered reads
-        report = f'{config["output"]}/fastp/report/{{sample}}.html'
+        fastq = temp(f'{config["output"]}/fastp/{{sample}}_filt.fastq.gz'),    # output filtered reads
+        report = temp(f'{config["output"]}/fastp/report/{{sample}}.html')
     singularity:
         config["fastp"]
     shell:
@@ -115,7 +116,7 @@ rule collate_view_stats:
     input:
         expand(f'{config["output"]}/samtools/{{sample}}.{{ref}}.v.txt', sample=NAMES, ref=REF)
     output:
-        f'{config["output"]}/samtools/view_stats.csv'
+        temp(f'{config["output"]}/samtools/view_stats.csv')
     run:
         with open(output[0], 'w') as out:
             for path in input:
@@ -131,7 +132,7 @@ rule collate_rt_stats:
     input:
         expand(f'{config["output"]}/samtools/{{sample}}.{{ref}}.rt.txt', sample=NAMES, ref=REF)
     output:
-        f'{config["output"]}/samtools/view_stats_rt.csv'
+        temp(f'{config["output"]}/samtools/view_stats_rt.csv')
     run:
         with open(output[0], 'w') as out:
             for path in input:
@@ -147,7 +148,7 @@ rule collate_error_rates:
     input:
         expand(f'{config["output"]}/samtools/{{sample}}.{{ref}}.txt', sample=NAMES, ref=REF)
     output:
-        f'{config["output"]}/samtools/error_rates.csv'
+        temp(f'{config["output"]}/samtools/error_rates.csv')
     run:
         with open(output[0], 'w') as out:
             for path in input:
@@ -163,7 +164,7 @@ rule minimum_error_rates:
     input:
         f'{config["output"]}/samtools/error_rates.csv'
     output:
-        f'{config["output"]}/samtools/minimum_error_rates.csv'
+        temp(f'{config["output"]}/samtools/minimum_error_rates.csv')
     params:
         output = config["output"]
     script:
@@ -175,7 +176,7 @@ rule consensus:
     input:
         bam = f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam'
     output:
-        fasta = f'{config["output"]}/consensus/{{sample}}.{{ref}}.fa'
+        fasta = temp(f'{config["output"]}/consensus/{{sample}}.{{ref}}.fa')
     singularity:
         config["samtools"]
     shell:
@@ -203,12 +204,15 @@ rule medaka:
     params:
         model = "r1041_e82_400bps_sup_g615"
     output:
-        fasta_medaka = directory(f'{config["output"]}/consensus/medaka/{{sample}}.{{ref}}')
+        fasta_medaka = temp(directory(f'{config["output"]}/consensus/medaka/{{sample}}.{{ref}}'))
     singularity:
         config["medaka"]
     shell:
-        "medaka_consensus -r N -i {input.fastq} -d {input.fasta} -o {output.fasta_medaka} -m {params.model}"
-
+        #testing some things
+        """
+        medaka_consensus -r N -i {input.fastq} -d {input.fasta} -o {output.fasta_medaka} -m {params.model}
+        rm {input.fasta}.fai {input.fasta}.map-ont.mmi
+        """    
 
 # Do variant calling
 rule freebayes:
@@ -216,7 +220,7 @@ rule freebayes:
         bam = f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam',
         ref = "reference_genomes/{ref}.fa"
     output:
-        vcf = f'{config["output"]}/freebayes/{{sample}}.{{ref}}.vcf'
+        vcf = temp(f'{config["output"]}/freebayes/{{sample}}.{{ref}}.vcf') #MADE TEMP
     singularity:
         config["freebayes"]
     shell:  
@@ -231,7 +235,7 @@ rule copy_files:
         expand(f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam', sample=NAMES, ref=REF),
         expand(f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam.bai', sample=NAMES, ref=REF)
     output:
-        f'{config["output"]}/copy_files_done.txt'
+        temp(f'{config["output"]}/copy_files_done.txt')
     params:
         output = config["output"]
     script:
@@ -244,7 +248,7 @@ rule vcf_modification:
         f'{config["output"]}/samtools/minimum_error_rates.csv',
         expand(f'{config["output"]}/freebayes/{{sample}}.{{ref}}.vcf', sample=NAMES, ref=REF)
     output:
-        f'{config["output"]}/vcf_modifications_done.txt'
+        temp(f'{config["output"]}/vcf_modifications_done.txt')
     params:
         output = config["output"]
     script:
@@ -256,7 +260,8 @@ rule qc:
     input:
         f'{config["output"]}/copy_files_done.txt',
     output:
-        f'{config["output"]}/qc.csv'
+        f'{config["output"]}/qc.csv',    # qc file for the clinic
+        temp(f'{config["output"]}/qc_full.csv')    # full qc file
     params:
         output = config["output"]
     script:

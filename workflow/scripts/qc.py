@@ -37,6 +37,10 @@ def data_handling():
     df_merged = pd.merge(df_error_rates, df_view_stats, on=['read_id', 'ref'])
     df_merged = pd.merge(df_merged, df_view_stats_rt, on=['read_id', 'ref'])
 
+    # Genotyping
+    df_merged['ref'] = df_merged['ref'].str.replace('ref_','').str.upper()    
+    df_merged.rename(columns={'ref': 'genotype'}, inplace=True)
+
     # Get the number of mapped reads for the negative controls of the samples and the rt regions
     reads_neg_ctrl = df_merged.loc[df_merged['read_id'].str.contains('neg_ctrl'), 'mapped_reads'].values[0]
     reads_neg_ctrl_rt = df_merged.loc[df_merged['read_id'].str.contains('neg_ctrl'), 'mapped_reads_rt'].values[0]
@@ -51,9 +55,9 @@ def qc(df_merged):
     '''Perform QC checks'''
 
     # Perform QC checks
-    df_merged['qc_pass_ctrl'] = (df_merged['mapped reads neg_ctrl/mapped reads sample'] <= 0.1) & (df_merged['mapped_reads'] >= 100)   # Sample should have at least 10 times more reads than neg_ctrl and at least 100 mapped reads
+    df_merged['qc_pass_gt'] = (df_merged['mapped reads neg_ctrl/mapped reads sample'] <= 0.1) & (df_merged['mapped_reads'] >= 100)   # Sample should have at least 10 times more reads than neg_ctrl and at least 100 mapped reads
     df_merged['qc_pass_rt'] = (df_merged['mapped reads neg_ctrl_rt/mapped reads sample_rt'] <= 0.1) & (df_merged['mapped_reads_rt'] >= 100)    # Sample should have at least 10 times more reads than neg_ctrl and at least 100 reads mapped to the RT region 
-    df_merged['qc_pass'] = df_merged['qc_pass_ctrl'] & df_merged['qc_pass_rt']    # True if sample passes both QC checks
+    df_merged['qc_pass'] = df_merged['qc_pass_gt'] & df_merged['qc_pass_rt']    # True if sample passes both QC checks
 
     # Perform QC check of the negative control
     mapped_reads_tot = df_merged['mapped_reads'].sum()
@@ -71,15 +75,12 @@ def qc(df_merged):
 def output_results(df_merged, output):
     '''Output the results'''
 
-    # All results
-    df_merged.to_csv(f'{output}/qc.csv', index=False)
+    # Output full qc file
+    df_merged.to_csv(f'{output}/qc_full.csv', index=False)
 
-    # Results relevant to the clinic
-    df_clinic = df_merged[['read_id','ref','mapped_reads','mapped_reads_rt','qc_pass']]
-
-    os.makedirs(f'{output}/clinic', exist_ok=True)
-
-    df_clinic.to_csv(f'{output}/clinic/qc.csv', index=False)
+    # Output qc file with results relevant to the clinic
+    df_clinic = df_merged[['read_id','genotype','qc_pass_gt', 'mapped_reads','mapped_reads_rt','qc_pass_rt']]
+    df_clinic.to_csv(f'{output}/qc.csv', index=False)
 
 def main():
     output = get_output()
