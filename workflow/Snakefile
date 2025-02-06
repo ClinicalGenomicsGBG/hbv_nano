@@ -14,7 +14,7 @@ REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference 
 REF = REFERENCE.ref    # extract reference genome names
 
 if config["now_time"]:
-    config["output"] = f'{config["output"]}/{config["now_time"]}_hbv_nano'
+    config["output"] = f'{config["output"]}/{config["now_time"]}_{config["run_id"]}'
     
 rule all:    # specify the final output files
     input:

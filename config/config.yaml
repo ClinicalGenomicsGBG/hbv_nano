@@ -7,6 +7,9 @@ output: "output"
 # Timestamp:
 now_time: ""
 
+# Run ID:
+run_id: ""
+
 # Apptainer images
 fastp: "images/fastp_0.23.4.img"
 freebayes: "images/freebayes_1.3.7.img"
