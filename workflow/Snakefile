@@ -7,14 +7,14 @@ global files
 
 configfile: "config/config.yaml"
 
-FILES = glob_wildcards(config["fastq_folder"] + "/{sample}.fastq.gz")    # get all fastq files
+FILES = glob_wildcards(config["fastq_concat_dir"] + "/{sample}.fastq.gz")    # get all fastq files
 NAMES = FILES.sample    # extract sample names
 
 REFERENCE = glob_wildcards("reference_genomes/{ref}.fa")    # get all reference genomes 
 REF = REFERENCE.ref    # extract reference genome names
 
 if config["now_time"]:
-    config["output"] = f'{config["output"]}/{config["now_time"]}_hbv_nano'
+    config["output"] = f'{config["output"]}/{config["now_time"]}_{config["run_id"]}'
     
 rule all:    # specify the final output files
     input:
@@ -35,7 +35,7 @@ rule all:    # specify the final output files
 # Preprocess the fastq files
 rule fastp:
     input:
-        fastq = f'{config["fastq_folder"]}/{{sample}}.fastq.gz'    # get all fastq files
+        fastq = f'{config["fastq_concat_dir"]}/{{sample}}.fastq.gz'    # get all fastq files
     output: 
         fastq = temp(f'{config["output"]}/fastp/{{sample}}_filt.fastq.gz'),    # output filtered reads
         report = temp(f'{config["output"]}/fastp/report/{{sample}}.html')
