@@ -244,8 +244,9 @@ for read_id, ref in samples.items():
         qual_val = [float(x.strip()) for x in qual_val if x.strip() != '__']
 
         if not qual_val or all(x <= 1 for x in qual_val):
-            return pd.Series(dtype='float64')
-        
+            #return pd.Series(dtype='float64')
+            row['qc_pass'] = "NA"
+            return row
         # Check if any qual value <= 30 and assign True, False
         if any(x <= 30 for x in qual_val):
             row['qc_pass'] = "False"
