@@ -243,6 +243,7 @@ for read_id, ref in samples.items():
         qual_val = row['QUAL'].split(';')
         qual_val = [float(x.strip()) for x in qual_val if x.strip() != '__']
 
+        # If all qual values are either non-existent or <= 1 and assign NA
         if not qual_val or all(x <= 1 for x in qual_val):
             row['qc_pass'] = "NA"
             return row
@@ -254,7 +255,9 @@ for read_id, ref in samples.items():
             row['qc_pass'] = "True"
         return row
 
+    # Filter based on the QUAL values
     aa_data_df = aa_data_df.apply(qual_check, axis=1).dropna(how='all')    # Filter using the qual_check function
+    aa_data_df = aa_data_df[aa_data_df['qc_pass'] != "NA"]    # Drop rows where all qual values are either non-existent or <= 1
     
     # Move qc_pass column to the end of the df
     qc = aa_data_df.pop('qc_pass')
