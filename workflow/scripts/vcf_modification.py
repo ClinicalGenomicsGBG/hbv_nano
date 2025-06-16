@@ -56,11 +56,9 @@ def get_references(reference_path):
                 next(f)  # Skip the header line
                 sequence = ''.join(line.strip() for line in f)
                 reference_dict[base_name] = sequence
-    return reference_dict
+    return reference_dict 
 
 reference_genomes = get_references('reference_genomes')    # Read in reference genomes
-#####
-
 
 
 for read_id, ref in samples.items():    
