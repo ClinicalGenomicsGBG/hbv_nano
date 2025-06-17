@@ -220,7 +220,7 @@ rule freebayes:
         bam = f'{config["output"]}/samtools/{{sample}}.{{ref}}.bam',
         ref = "reference_genomes/{ref}.fa"
     output:
-        vcf = temp(f'{config["output"]}/freebayes/{{sample}}.{{ref}}.vcf') #MADE TEMP
+        vcf = temp(f'{config["output"]}/freebayes/{{sample}}.{{ref}}.vcf')
     singularity:
         config["freebayes"]
     shell:  
