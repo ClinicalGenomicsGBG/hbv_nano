@@ -3,6 +3,8 @@
 import pdb
 
 import csv
+import glob
+import os
 import yaml
 
 
@@ -16,7 +18,7 @@ def get_output():
             config = yaml.safe_load(f)
         output = config['output']
     return output
-breakpoint()
+
 output = get_output()    # Get the Snakemake output folder
 output = "/clinical/data/hbv_nano/results/250617-094351_250616_hbv_val_03_test"
 
@@ -30,3 +32,15 @@ def get_read_id_ref(file_path):
 
 read_id_ref = get_read_id_ref(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and its reference
 
+breakpoint()
+
+def get_ref_genomes(ref_path):
+    '''Get all the reference genomes (a->j))'''
+    
+    return {
+        os.path.splitext(os.path.basename(filepath))[0]:
+            ''.join(line.strip() for line in open(filepath) if not line.startswith('>'))
+        for filepath in glob.glob(os.path.join(ref_path, 'ref_*.fa'))
+    }
+
+ref_genomes= get_ref_genomes('reference_genomes')
