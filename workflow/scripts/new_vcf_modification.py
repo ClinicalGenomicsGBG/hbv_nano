@@ -4,6 +4,7 @@ import pdb
 
 import csv
 import glob
+import vcfpy
 import os
 import yaml
 
@@ -32,7 +33,6 @@ def get_read_id_ref(file_path):
 
 read_id_ref = get_read_id_ref(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and its reference
 
-breakpoint()
 
 def get_ref_genomes(ref_path):
     '''Get all the reference genomes (a->j))'''
@@ -44,3 +44,5 @@ def get_ref_genomes(ref_path):
     }
 
 ref_genomes= get_ref_genomes('reference_genomes')
+
+
