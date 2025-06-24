@@ -46,3 +46,8 @@ def get_ref_genomes(ref_path):
 ref_genomes= get_ref_genomes('reference_genomes')
 
 
+###dev
+reader = vcfpy.Reader.from_path('')
+record = next(reader)
+print(f'chrom: {record.CHROM}, pos: {record.POS}, ref: {record.REF}, alt: {record.ALT}')
+###dev
