@@ -21,7 +21,6 @@ def get_output():
     return output
 
 output = get_output()    # Get the Snakemake output folder
-output = "/clinical/data/hbv_nano/results/250617-094351_250616_hbv_val_03_test"
 
 
 def get_read_id_ref(file_path):
@@ -47,7 +46,33 @@ ref_genomes= get_ref_genomes('reference_genomes')
 
 
 ###dev
-reader = vcfpy.Reader.from_path('')
-record = next(reader)
-print(f'chrom: {record.CHROM}, pos: {record.POS}, ref: {record.REF}, alt: {record.ALT}')
+#reader = vcfpy.Reader.from_path('')
+#record = next(reader)
+#print(f'chrom: {record.CHROM}, pos: {record.POS}, ref: {record.REF}, alt: {record.ALT}')
 ###dev
+
+def vcf(reader):
+    vcf = []
+    for record in reader:
+        call = record.calls[0]
+        ref = record.REF
+        alt = record.ALT[0].value if record.ALT else ''
+        pos = record.POS
+        max_len = max(len(ref), len(alt))
+        for i in range(max_len):
+            split_row = {
+                'pos': pos + i,
+                'ref': ref[i] if i < len(ref) else '',
+                'alt': alt[i] if i < len(alt) else '',
+                'qual': record.QUAL,
+                'AO': call.data.get('AO'),
+                'RO': call.data.get('RO'),
+            }
+            vcf.append(split_row)
+    return vcf
+
+path = ''
+
+reader = vcfpy.Reader.from_path(path)
+vcf = vcf(reader)
+print(vcf)
