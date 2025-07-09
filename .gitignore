@@ -34,3 +34,4 @@ workflow/scripts/update_config.py
 run/*
 test_data/
 config/wrapper_config.yaml
+config/dev_config.yaml

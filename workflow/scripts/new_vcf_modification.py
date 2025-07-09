@@ -15,7 +15,7 @@ def get_output():
     try:
         output = snakemake.params.output
     except NameError:
-        with open('config/config.yaml', 'r') as f:
+        with open('config/dev_config.yaml', 'r') as f:
             config = yaml.safe_load(f)
         output = config['output']
     return output
@@ -52,7 +52,8 @@ ref_genomes= get_ref_genomes('reference_genomes')
 ###dev
 
 def vcf(reader):
-    vcf = []
+    #vcf = []
+    vcf = {}
     for record in reader:
         call = record.calls[0]
         ref = record.REF
@@ -60,6 +61,7 @@ def vcf(reader):
         pos = record.POS
         max_len = max(len(ref), len(alt))
         for i in range(max_len):
+            key = pos + i
             split_row = {
                 'pos': pos + i,
                 'ref': ref[i] if i < len(ref) else '',
@@ -68,11 +70,16 @@ def vcf(reader):
                 'AO': call.data.get('AO'),
                 'RO': call.data.get('RO'),
             }
-            vcf.append(split_row)
+            vcf[key] = split_row
     return vcf
 
-path = ''
+
+path = f'{output}/freebayes/KH20-2510.ref_d.vcf'
+
 
 reader = vcfpy.Reader.from_path(path)
 vcf = vcf(reader)
-print(vcf)
+
+for pos in range(31, 90):
+    if pos in vcf:
+        print(vcf[pos])
