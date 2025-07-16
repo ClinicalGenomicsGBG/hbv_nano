@@ -107,7 +107,7 @@ rule samtools_view:
     shell:
         """
         samtools view -F 260 {input.bam} | awk 'length($10) >= 400' | wc -l > {output.stats}   
-        samtools view -F 260 {input.bam} {wildcards.ref}:130-1161 | awk 'length($10) >= 400' | wc -l > {output.mapped_reads}
+        samtools view -F 260 {input.bam} {wildcards.ref}:600-1161 | awk 'length($10) >= 400' | wc -l > {output.mapped_reads}
         """
 
 
