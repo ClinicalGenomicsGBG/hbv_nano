@@ -30,7 +30,7 @@ def get_read_id_ref(file_path):
         reader = csv.DictReader(csv_file)
         return {row['read_id']: row['ref'] for row in reader}
 
-read_id_ref = get_read_id_ref(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and its reference
+#read_id_ref = get_read_id_ref(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and its reference
 
 
 def get_ref_genomes(ref_path):
@@ -44,12 +44,6 @@ def get_ref_genomes(ref_path):
 
 ref_genomes= get_ref_genomes('reference_genomes')
 
-
-###dev
-#reader = vcfpy.Reader.from_path('')
-#record = next(reader)
-#print(f'chrom: {record.CHROM}, pos: {record.POS}, ref: {record.REF}, alt: {record.ALT}')
-###dev
 
 def vcf(reader):
     vcf = {}
