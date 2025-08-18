@@ -30,8 +30,8 @@ def get_read_id_ref(file_path):
         reader = csv.DictReader(csv_file)
         return {row['read_id']: row['ref'] for row in reader}
 
-#read_id_ref = get_read_id_ref(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and its reference
-
+read_id_ref = get_read_id_ref(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and its reference
+print(f'{read_id_ref}, read_id_ref' )
 
 def get_ref_genomes(ref_path):
     '''Get all the reference genomes (a->j))'''
@@ -44,33 +44,57 @@ def get_ref_genomes(ref_path):
 
 ref_genomes= get_ref_genomes('reference_genomes')
 
-
-def vcf(reader):
+def read_vcf(reader):
+    '''Read in the relevant information from the vcf file'''
+    
     vcf = {}
+    
     for record in reader:
         call = record.calls[0]
-        ref = record.REF
-        alts = [alt.value for alt in record.ALT] if record.ALT else ['']
         pos = record.POS
+        vcf[pos] = {
+            'pos': pos,
+            'ref': record.REF,
+            'alt': [alt.value for alt in record.ALT] if record.ALT else [''],
+            'qual': record.QUAL,
+            'AO':  call.data.get('AO'),
+            'RO': call.data.get('RO'),
+        }
+    return vcf
+
+def split_vcf(vcf):
+    '''Split the reference and and alternative sequnce(s) into sepparate positions in the vcf file.'''
+    
+    split_vcf = {}
+    for pos, vcf in vcf.items():
+        ref = vcf['ref']
+        alts = vcf['alt']
+        AO = vcf['AO']
+        RO = vcf['RO']
+        qual = vcf['qual']
         max_len = max([len(ref)] + [len(alt) for alt in alts])
         for i in range(max_len):
             key = pos + i
             split_row = {
-                'pos': pos + i,
+                #'i': i,
+                'pos': key,
                 'ref': ref[i] if i < len(ref) else '',
-                'qual': record.QUAL,
-                'AO': call.data.get('AO'),
-                'RO': call.data.get('RO'),
+                'qual': qual,
+                'AO': AO,
+                'RO': RO,
             }
             for idx, alt in enumerate(alts):
                 split_row[f'alt_{idx + 1}'] = alt[i] if i < len(alt) else ''
-            vcf[key] = split_row
-    return vcf
+                split_row[f'freq_{idx + 1}'] = round(AO[idx] / (sum(AO) + RO), 3)    # Calculate the frequency for each alt
+            split_vcf[key] = split_row
+    return split_vcf
 
 
 path = f'{output}/freebayes/KH20-2510.ref_d.vcf'
 reader = vcfpy.Reader.from_path(path)
-vcf = vcf(reader)
+#vcf = vcf(reader)
+vcf = read_vcf(reader)
+vcf = split_vcf(vcf)
 
 for pos in range(1700, 1900):
     if pos in vcf:
