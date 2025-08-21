@@ -20,7 +20,7 @@ def get_output():
         output = config['output']
     return output
 
-output = get_output()    # Get the Snakemake output folder
+#output = get_output()    # Get the Snakemake output folder
 
 
 def get_read_id_ref(file_path):
@@ -28,21 +28,20 @@ def get_read_id_ref(file_path):
 
     with open(file_path) as csv_file:
         reader = csv.DictReader(csv_file)
-        return {row['read_id']: row['ref'] for row in reader}
+        return {row['read_id']: row['ref'] for row in reader}  #Check return!
 
-read_id_ref = get_read_id_ref(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and its reference
-print(f'{read_id_ref}, read_id_ref' )
+#read_id_ref = get_read_id_ref(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and its reference
+#print(f'{read_id_ref}, read_id_ref' )
 
 def get_ref_genomes(ref_path):
     '''Get all the reference genomes (a->j))'''
-    
+    #TODO: Use return differently!
     return {
         os.path.splitext(os.path.basename(filepath))[0]:
             ''.join(line.strip() for line in open(filepath) if not line.startswith('>'))
         for filepath in glob.glob(os.path.join(ref_path, 'ref_*.fa'))
     }
 
-ref_genomes= get_ref_genomes('reference_genomes')
 
 def read_vcf(reader):
     '''Read in the relevant information from the vcf file'''
@@ -60,7 +59,7 @@ def read_vcf(reader):
             'AO':  call.data.get('AO'),
             'RO': call.data.get('RO'),
         }
-    return vcf
+    return vcf  #TODO: döp om variabel till något annat
 
 def split_vcf(vcf):
     '''Split the reference and and alternative sequnce(s) into sepparate positions in the vcf file.'''
@@ -90,12 +89,19 @@ def split_vcf(vcf):
     return split_vcf
 
 
-path = f'{output}/freebayes/KH20-2510.ref_d.vcf'
-reader = vcfpy.Reader.from_path(path)
-#vcf = vcf(reader)
-vcf = read_vcf(reader)
-vcf = split_vcf(vcf)
+def main():
+    output = get_output()    # Get the Snakemake output folder
+    ref_genomes = get_ref_genomes('reference_genomes')
+    print(f'{ref_genomes}, ref_genomes')
+    path = f'{output}/freebayes/KH20-2510.ref_d.vcf'
+    reader = vcfpy.Reader.from_path(path)
+    #vcf = vcf(reader)
+    vcf = read_vcf(reader)
+    vcf = split_vcf(vcf)
+    
+    for pos in range(130, 1161):    # The RT region
+        if pos in vcf:
+            print(vcf[pos])
 
-for pos in range(1700, 1900):
-    if pos in vcf:
-        print(vcf[pos])
+if __name__ == '__main__':
+    main()
