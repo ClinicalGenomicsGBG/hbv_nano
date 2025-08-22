@@ -35,12 +35,15 @@ def get_read_id_ref(file_path):
 
 def get_ref_genomes(ref_path):
     '''Get all the reference genomes (a->j))'''
-    #TODO: Use return differently!
-    return {
-        os.path.splitext(os.path.basename(filepath))[0]:
-            ''.join(line.strip() for line in open(filepath) if not line.startswith('>'))
-        for filepath in glob.glob(os.path.join(ref_path, 'ref_*.fa'))
-    }
+
+    ref_genomes = {}
+
+    for filepath in glob.glob(os.path.join(ref_path, 'ref_*.fa')):
+        key = os.path.splitext(os.path.basename(filepath))[0]
+        with open(filepath) as ref_path:
+            ref_sequence = ''.join(line.strip() for line in ref_path if not line.startswith('>'))
+        ref_genomes[key] = ref_sequence
+    return ref_genomes
 
 
 def read_vcf(reader):
@@ -98,10 +101,10 @@ def main():
     #vcf = vcf(reader)
     vcf = read_vcf(reader)
     vcf = split_vcf(vcf)
-    
+    '''
     for pos in range(130, 1161):    # The RT region
         if pos in vcf:
             print(vcf[pos])
-
+    '''
 if __name__ == '__main__':
     main()
