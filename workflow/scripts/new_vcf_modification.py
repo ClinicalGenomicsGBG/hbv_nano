@@ -9,7 +9,7 @@ import os
 import yaml
 
 
-def get_output():
+def get_snakemake_output():
     '''Get output folder using snakemake or, if running script independently, directly from config file'''
     
     try:
@@ -20,8 +20,6 @@ def get_output():
         output = config['output']
     return output
 
-#output = get_output()    # Get the Snakemake output folder
-
 
 def get_read_id_ref(file_path):
     '''Get the best matching reference for each read_id'''
@@ -30,8 +28,6 @@ def get_read_id_ref(file_path):
         reader = csv.DictReader(csv_file)
         return {row['read_id']: row['ref'] for row in reader}  #Check return!
 
-#read_id_ref = get_read_id_ref(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and its reference
-#print(f'{read_id_ref}, read_id_ref' )
 
 def get_ref_genomes(ref_path):
     '''Get all the reference genomes (a->j))'''
@@ -93,7 +89,9 @@ def split_vcf(vcf):
 
 
 def main():
-    output = get_output()    # Get the Snakemake output folder
+    output = get_snakemake_output()    # Get the Snakemake output folder
+    read_id_ref = get_read_id_ref(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and its reference
+    print(f'{read_id_ref}, read_id_ref' )
     ref_genomes = get_ref_genomes('reference_genomes')
     print(f'{ref_genomes}, ref_genomes')
     path = f'{output}/freebayes/KH20-2510.ref_d.vcf'
