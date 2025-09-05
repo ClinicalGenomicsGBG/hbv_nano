@@ -26,7 +26,7 @@ def get_read_id_ref(file_path):
 
     with open(file_path) as csv_file:
         reader = csv.DictReader(csv_file)
-        return {row['read_id']: row['ref'] for row in reader}  #Check return!
+        return {row['read_id']: row['ref'] for row in reader}  #TODO: Check return!
 
 
 def get_ref_genomes(ref_path):
@@ -45,12 +45,12 @@ def get_ref_genomes(ref_path):
 def read_vcf(reader):
     '''Read in the relevant information from the vcf file'''
     
-    vcf = {}
+    vcf_dict = {}
     
     for record in reader:
         call = record.calls[0]
         pos = record.POS
-        vcf[pos] = {
+        vcf_dict[pos] = {
             'pos': pos,
             'ref': record.REF,
             'alt': [alt.value for alt in record.ALT] if record.ALT else [''],
@@ -58,7 +58,7 @@ def read_vcf(reader):
             'AO':  call.data.get('AO'),
             'RO': call.data.get('RO'),
         }
-    return vcf  #TODO: döp om variabel till något annat
+    return vcf_dict
 
 def split_vcf(vcf):
     '''Split the reference and and alternative sequnce(s) into sepparate positions in the vcf file.'''
