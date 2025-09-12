@@ -80,10 +80,12 @@ def split_vcf(vcf):
                 'qual': qual,
                 'AO': AO,
                 'RO': RO,
+                'alts': {}
             }
             for idx, alt in enumerate(alts):
-                split_row[f'alt_{idx + 1}'] = alt[i] if i < len(alt) else ''
-                split_row[f'freq_{idx + 1}'] = round(AO[idx] / (sum(AO) + RO), 3)    # Calculate the frequency for each alt
+                base = alt[i] if i < len(alt) else ''
+                freq = round(AO[idx] / (sum(AO) + RO), 3)    # Calculate the frequency for each alt
+                split_row['alts'][idx +1] = {'base': base, 'freq': freq}
             split_vcf[key] = split_row
     return split_vcf
 
