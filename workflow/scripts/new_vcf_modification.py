@@ -10,7 +10,7 @@ import yaml
 
 
 def get_snakemake_output():
-    '''Get output folder using snakemake or, if running script independently, directly from config file'''
+    '''Get output folder using Snakemake or, if running script independently, directly from config file'''
     
     try:
         output = snakemake.params.output
@@ -26,8 +26,8 @@ def get_read_id_ref(file_path):
 
     with open(file_path) as csv_file:
         reader = csv.DictReader(csv_file)
-        return {row['read_id']: row['ref'] for row in reader}  #TODO: Check return!
-
+        read_id_ref = {row['read_id']: row['ref'] for row in reader}  #TODO: Check return!
+    return read_id_ref
 
 def get_ref_genomes(ref_path):
     '''Get all the reference genomes (a->j))'''
@@ -85,7 +85,7 @@ def split_vcf(vcf):
             for idx, alt in enumerate(alts):
                 base = alt[i] if i < len(alt) else ''
                 freq = round(AO[idx] / (sum(AO) + RO), 3)    # Calculate the frequency for each alt
-                split_row['alts'][idx +1] = {'base': base, 'freq': freq}
+                split_row['alts'][idx +1] = {'base': base, 'freq': freq}    # idx + 1 because alt index starts at 1 in vcf
             split_vcf[key] = split_row
     return split_vcf
 
@@ -103,14 +103,15 @@ def add_ref_vcf(split_vcf, ref_seq, ref_genotype):
 
 def main():
     output = get_snakemake_output()    # Get the Snakemake output folder
+    print(f'{output}, output') #DEV
     read_id_ref = get_read_id_ref(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and its reference
     print(f'{read_id_ref}, read_id_ref' )
     x = read_id_ref['KH20-2510']
-    print(f'{x}, x')
+    #print(f'{x}, x')
     ref_genomes = get_ref_genomes('reference_genomes')   # get reference genomes from folder reference_genomes
     #print(f'{ref_genomes}, ref_genomes')    # DEV: Print referenece genomes
     ref_d = ref_genomes['ref_d']
-    print(ref_d[0:50])
+    #print(ref_d[0:200])
     #print(f'{ref_genomes['ref_a']}')
     
     path = f'{output}/freebayes/KH20-2510.ref_d.vcf'
@@ -118,11 +119,15 @@ def main():
     #vcf = vcf(reader)
     vcf = read_vcf(reader)
     vcf = split_vcf(vcf)
-    vcf = add_ref_vcf(vcf, ref_genomes['ref_a'], 'ref_a')
+    #vcf = add_ref_vcf(vcf, ref_genomes['ref_a'], 'ref_a')
     #for pos in range(130, 1161):
-    for pos in range(1, 100):    # The RT region
-        if pos in vcf:
-            print(vcf[pos])
+   
+    #for pos in range(1, 200):    # The RT region
+    #    if pos in vcf:
+    #        print(vcf[pos])
+
+    #alt1_base = vcf[31]['alts'][1]['base']
+    #print(alt1_base)
 
 if __name__ == '__main__':
     main()
