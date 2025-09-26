@@ -25,8 +25,8 @@ def get_read_id_ref(file_path):
     '''Get the best matching reference for each read_id'''
 
     with open(file_path) as csv_file:
-        reader = csv.DictReader(csv_file)
-        read_id_ref = {row['read_id']: row['ref'] for row in reader}  #TODO: Check return!
+        csv_reader = csv.DictReader(csv_file)
+        read_id_ref = {row['read_id']: row['ref'] for row in csv_reader}
     return read_id_ref
 
 def get_ref_genomes(ref_path):
