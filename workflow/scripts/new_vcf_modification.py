@@ -7,6 +7,7 @@ import glob
 import vcfpy
 import os
 import yaml
+import json
 
 
 def get_snakemake_output():
@@ -52,10 +53,12 @@ def read_vcf(reader):
         pos = record.POS
         vcf_dict[pos] = {
             'pos': pos,
-            'ref': record.REF,
-            'alt': [alt.value for alt in record.ALT] if record.ALT else [''],
+            'ref': record.REF,    #TODO: Check if this can be removed
+            #'alt': [alt.value for alt in record.ALT] if record.ALT else [],
+            'alt': {idx: alt.value for idx, alt in enumerate(record.ALT)} if record.ALT else {},
             'qual': record.QUAL,
-            'AO':  call.data.get('AO'),
+            #'AO':  call.data.get('AO'),
+            'AO': {idx: ao for idx, ao in enumerate(call.data.get('AO'))} if call.data.get('AO') else {},
             'RO': call.data.get('RO'),
         }
     return vcf_dict
@@ -70,7 +73,7 @@ def split_vcf(vcf):
         AO = vcf['AO']
         RO = vcf['RO']
         qual = vcf['qual']
-        max_len = max([len(ref)] + [len(alt) for alt in alts])
+        max_len = max([len(ref)] + [len(alt) for alt in alts.values()])    # Get the maximum length of ref and alts
         for i in range(max_len):
             key = pos + i
             split_row = {
@@ -82,10 +85,11 @@ def split_vcf(vcf):
                 'RO': RO,
                 'alts': {}
             }
-            for idx, alt in enumerate(alts):
+            for idx, alt in alts.items():
                 base = alt[i] if i < len(alt) else ''
-                freq = round(AO[idx] / (sum(AO) + RO), 3)    # Calculate the frequency for each alt
-                split_row['alts'][idx +1] = {'base': base, 'freq': freq}    # idx + 1 because alt index starts at 1 in vcf
+                ao = AO.get(idx, 0)
+                freq = round(ao / (sum(AO.values()) + RO), 3)    # Calculate the frequency for each alt
+                split_row['alts'][idx] = {'base': base, 'freq': freq}    # idx + 1 because alt index starts at 1 in vcf
             split_vcf[key] = split_row
     return split_vcf
 
@@ -118,13 +122,15 @@ def main():
     reader = vcfpy.Reader.from_path(path)
     #vcf = vcf(reader)
     vcf = read_vcf(reader)
+    #print(f'{vcf}, vcf')
+    #print(json.dumps(vcf, indent=4))
     vcf = split_vcf(vcf)
     #vcf = add_ref_vcf(vcf, ref_genomes['ref_a'], 'ref_a')
     #for pos in range(130, 1161):
    
-    #for pos in range(1, 200):    # The RT region
-    #    if pos in vcf:
-    #        print(vcf[pos])
+    for pos in range(1, 900):    # The RT region
+        if pos in vcf:
+            print(vcf[pos])
 
     #alt1_base = vcf[31]['alts'][1]['base']
     #print(alt1_base)
