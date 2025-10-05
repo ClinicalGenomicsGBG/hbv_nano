@@ -93,8 +93,9 @@ def split_vcf(vcf):
             split_vcf[key] = split_row
     return split_vcf
 
+
 def add_ref_vcf(split_vcf, ref_seq, ref_genotype):
-    'Add the reference to the split vcf'''
+    '''Add the reference to the split vcf'''
 
     ref_len = len(ref_seq)
     for pos in range(1, ref_len + 1):    # For positon in the reference seqeunce (position starts at 1)
@@ -105,16 +106,29 @@ def add_ref_vcf(split_vcf, ref_seq, ref_genotype):
             split_vcf[pos] = {'pos': pos, ref_genotype: base}    
     return split_vcf
 
+
+def process_all_vcfs(read_id_ref, output):
+    '''Construct the complete nested dictionary using vcf files matching read_id_ref and the split_vcf function'''
+
+    all_vcfs = {}
+    for sample_id, ref in read_id_ref.items():
+        vcf_path = f"{output}/freebayes/{sample_id}.{ref}.vcf"
+        if os.path.exists(vcf_path):
+            reader = vcfpy.Reader.from_path(vcf_path)
+            vcf_dict = read_vcf(reader)
+            split_vcf_dict = split_vcf(vcf_dict)
+            all_vcfs[f"{sample_id}.{ref}"] = split_vcf_dict
+    return all_vcfs
+
+
 def main():
     output = get_snakemake_output()    # Get the Snakemake output folder
     print(f'{output}, output') #DEV
     read_id_ref = get_read_id_ref(f'{output}/samtools/minimum_error_rates.csv')    # Read in file containing read_id and its reference
     print(f'{read_id_ref}, read_id_ref' )
-    x = read_id_ref['KH20-2510']
-    #print(f'{x}, x')
     ref_genomes = get_ref_genomes('reference_genomes')   # get reference genomes from folder reference_genomes
     #print(f'{ref_genomes}, ref_genomes')    # DEV: Print referenece genomes
-    ref_d = ref_genomes['ref_d']
+    #ref_d = ref_genomes['ref_d']
     #print(ref_d[0:200])
     #print(f'{ref_genomes['ref_a']}')
     
@@ -127,10 +141,17 @@ def main():
     vcf = split_vcf(vcf)
     #vcf = add_ref_vcf(vcf, ref_genomes['ref_a'], 'ref_a')
     #for pos in range(130, 1161):
-   
-    for pos in range(1, 900):    # The RT region
-        if pos in vcf:
-            print(vcf[pos])
+    all_vcfs = process_all_vcfs(read_id_ref, output)
+    #for sample_key, vcf in all_vcfs.items():
+    #    print(f"Sample: {sample_key}")
+    #    for pos in range(1, 900):
+    #        if pos in vcf:
+    #            print(vcf[pos])
+    print(json.dumps(all_vcfs, indent=4))
+#                
+#    for pos in range(1, 900):    # The RT region
+#        if pos in vcf:
+#            print(vcf[pos])
 
     #alt1_base = vcf[31]['alts'][1]['base']
     #print(alt1_base)
