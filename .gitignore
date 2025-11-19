@@ -35,3 +35,6 @@ run/*
 test_data/
 config/wrapper_config.yaml
 config/dev_config.yaml
+.DS_Store
+._*
+
